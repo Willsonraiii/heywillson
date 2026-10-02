@@ -1,23 +1,33 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-59 8 344 344">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
   <defs>
-    <linearGradient id="oil" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#00f2ff"/><stop offset="15%" stop-color="#0066ff"/><stop offset="35%" stop-color="#7000ff"/><stop offset="50%" stop-color="#ff0080"/><stop offset="65%" stop-color="#ff9900"/><stop offset="85%" stop-color="#ccff00"/><stop offset="100%" stop-color="#00ffcc"/>
+    <linearGradient id="steel" x1="22" y1="19" x2="75" y2="88" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#f8fbff"/>
+      <stop offset=".22" stop-color="#b7c5d8"/>
+      <stop offset=".43" stop-color="#eef4fb"/>
+      <stop offset=".69" stop-color="#8193aa"/>
+      <stop offset="1" stop-color="#dce6f2"/>
     </linearGradient>
+    <linearGradient id="coffee" x1="46" y1="20" x2="54" y2="31" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#72452a"/>
+      <stop offset="1" stop-color="#24150f"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="30" y1="30" x2="40" y2="66" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff" stop-opacity=".92"/>
+      <stop offset="1" stop-color="#fff" stop-opacity=".08"/>
+    </linearGradient>
+    <filter id="soft-shadow" x="2" y="8" width="96" height="96" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#03040a" flood-opacity=".28"/>
+    </filter>
   </defs>
-  <g transform="rotate(14 108 180)">
-    <path d="M45 110 Q10 110 10 185 Q10 260 45 270" stroke="url(#oil)" stroke-width="14" fill="none" stroke-linecap="round"/>
-    <path d="M55 95 L160 95 L175 285 Q175 310 108 310 Q40 310 40 285 L55 95 Z" fill="url(#oil)"/>
-    <path d="M160 95 Q188 95 208 68 Q200 100 168 108 Z" fill="url(#oil)"/>
-    <ellipse cx="108" cy="95" rx="53" ry="12" fill="#12101c"/>
-    <path d="M60 105 Q55 200 60 285" stroke="#fff" stroke-width="2.5" fill="none" opacity=".3" stroke-linecap="round"/>
-    <g transform="translate(108,195)" opacity="0.95">
-      <rect x="-28" y="-28" width="56" height="56" fill="none" stroke="#fff" stroke-width="1.8"/>
-      <line x1="-14" y1="12" x2="14" y2="-12" stroke="#fff" stroke-width="1.8"/>
-      <g fill="#fff" font-family="Inter, sans-serif" font-weight="800" font-size="12" letter-spacing="2" text-anchor="middle">
-        <text y="-14">BAR</text>
-        <text y="3">I</text>
-        <text y="20">STA</text>
-      </g>
-    </g>
+  <g filter="url(#soft-shadow)">
+    <path d="M28 29h-4.4c-8 0-12.1 5.8-12.1 16.4s4.1 16.4 12.1 16.4H29" stroke="url(#steel)" stroke-width="5.4" stroke-linecap="round"/>
+    <path d="M28.4 23.5h34.1c3.3 0 5.7 1.6 6.6 4.5l11.7-4.1c-1.6 8-6.3 13.3-13 16.1l2.2 31.4c.7 10-7.9 16.2-23.2 16.2S23 81.4 23.7 71.4l2.6-42.8c.2-3 1-5.1 2.1-5.1Z" fill="url(#steel)" stroke="#74849a" stroke-opacity=".64" stroke-width="1.05" stroke-linejoin="round"/>
+    <path d="M65.9 28.4c4.9-2.1 9.4-3.8 14.9-4.5-2 7-6.6 11.9-13.1 14.5" stroke="#f8fbff" stroke-opacity=".86" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+    <ellipse cx="46.8" cy="24.4" rx="18.2" ry="4.5" fill="#697b92"/>
+    <ellipse cx="46.8" cy="24.1" rx="14.7" ry="2.8" fill="url(#coffee)"/>
+    <path d="M41.6 23.5c2.8-2.5 6.5-2.5 9.3-.2-2.8 2.4-6.1 2.5-9.3.2Z" fill="#d6a66e" fill-opacity=".9"/>
+    <path d="M31.2 30.8c-2.1 13-2.5 25.9-1.8 38.7" stroke="url(#shine)" stroke-width="2.2" stroke-linecap="round"/>
+    <path d="M35.4 33.2c-.1 3.5 1.5 6 4.8 7.6" stroke="#fff" stroke-opacity=".36" stroke-width="1.6" stroke-linecap="round"/>
+    <path d="M39.5 80.7c5.9 2.6 11.8 3.2 18.2 1.8" stroke="#fff" stroke-opacity=".32" stroke-width="1.5" stroke-linecap="round"/>
   </g>
 </svg>
