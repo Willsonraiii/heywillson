@@ -128,24 +128,33 @@
     } else batteryUnavailable();
   })();
 
-  /* ─────────── heyclicky-style glass play-cta ─────────── */
+  /* ─────────── Heyclicky-style glass video controls ─────────── */
   (function () {
     var TRI = '<svg viewBox="0 0 24 24" width="24" height="24"><path d="M8.5 5.6 18 12l-9.5 6.4z" fill="currentColor"/></svg>';
+    var PAUSE = '<svg viewBox="0 0 24 24" width="24" height="24"><path d="M8 6.2v11.6M16 6.2v11.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>';
     function wire(btn, vid) {
       if (!btn || !vid) return;
+      function playing() { return !vid.paused && !vid.ended; }
       function paint() {
-        var playing = !vid.paused;
-        var t = $('.tri', btn), label = $('.play-label', btn);
-        if (t) t.innerHTML = TRI;
-        if (label) label.textContent = 'play video';
-        btn.classList.toggle('is-playing', playing);
-        btn.setAttribute('aria-label', playing ? 'Pause video' : 'Play video');
-        btn.setAttribute('aria-pressed', String(playing));
+        var active = playing(), t = $('.tri', btn), label = $('.play-label', btn);
+        if (t) t.innerHTML = active ? PAUSE : TRI;
+        if (label) label.textContent = active ? 'pause video' : 'play video';
+        btn.classList.toggle('is-playing', active);
+        btn.setAttribute('aria-label', active ? 'Pause video' : 'Play video');
+        btn.setAttribute('aria-pressed', String(active));
       }
-      btn.addEventListener('click', function () {
-        if (vid.paused) { var p = vid.play(); if (p && p.catch) p.catch(noop); } else vid.pause();
+      btn.addEventListener('click', function (e) {
+        e.preventDefault(); e.stopPropagation();
+        if (playing()) { vid.pause(); return; }
+        var promise;
+        try { promise = vid.play(); }
+        catch (err) { paint(); flash('This video could not start. Tap to try again.'); return; }
+        if (promise && promise.catch) promise.catch(function () {
+          paint(); flash('This video could not start. Tap to try again.');
+        });
       });
-      vid.addEventListener('play', paint); vid.addEventListener('pause', paint);
+      vid.addEventListener('play', paint); vid.addEventListener('playing', paint);
+      vid.addEventListener('pause', paint); vid.addEventListener('ended', paint);
       paint();
     }
     wire($('#reelCta'), $('#reelVid'));
@@ -806,7 +815,7 @@
     $$('li[data-i]', spotList).forEach(function (li, i) { li.classList.toggle('is-sel', i === sel); });
     var cur = $('li.is-sel', spotList); if (cur && cur.scrollIntoView) cur.scrollIntoView({ block: 'nearest' });
   }
-  var spotButtons = [$('#spotBtn'), $('#mobileSpotBtn')].filter(Boolean);
+  var spotButtons = [$('#spotBtn')].filter(Boolean);
   function runSel() { var r = results[sel]; if (!r) return; closeSpot(); r.act(); }
   function openSpot() {
     closeMenus(); closeCC(); spot.hidden = false; spotInput.value = ''; renderSpot('');
