@@ -17,7 +17,7 @@
   var syncClipState = noop; /* called after the shared volume changes, to re-silence previews */
 
   /* ─────────── prefs ─────────── */
-  var S = { stars: 'on', motion: reduce ? 'reduced' : 'full', dock: 'on', glass: 8, accent: 'ice', density: 150, notifs: 'on', bright: 100, vol: 0, lastVol: 40 };
+  var S = { stars: 'on', motion: reduce ? 'reduced' : 'full', dock: 'on', glass: 8, accent: 'ice', density: 150, notifs: 'on', bright: 100, vol: 0, lastVol: 40, custom: '' };
   try {
     var saved = JSON.parse(localStorage.getItem('wr-cosmos') || '{}');
     Object.keys(saved).forEach(function (k) { if (k in S) S[k] = saved[k]; });
@@ -25,12 +25,60 @@
     S.density = Math.max(40, Math.min(300, +S.density || 150));
     S.vol = Math.max(0, Math.min(100, +S.vol || 0));
     S.lastVol = Math.max(1, Math.min(100, +S.lastVol || 40));
+    if (S.accent === 'custom' ? !/^#[0-9a-f]{6}$/i.test(S.custom) : !/^(ice|grape|rose|moss|amber)$/.test(S.accent)) S.accent = 'ice';
   } catch (e) {}
   // The operating-system accessibility preference wins on page load; the site switch can still override it for this session.
   if (reduce) S.motion = 'reduced';
   function save() { try { localStorage.setItem('wr-cosmos', JSON.stringify(S)); } catch (e) {} }
   function set(sel, txt) { var el = $(sel); if (el) el.textContent = txt; }
   var ACC_TINT = { ice: '207,228,255', grape: '233,214,255', rose: '255,220,228', moss: '214,255,226', amber: '255,236,205' };
+
+  /* ─────────── accent colour maths (custom colours from the wheel) ─────────── */
+  var ACC_HEX = { ice: '#0a84ff', grape: '#bf5af2', rose: '#ff375f', moss: '#30d158', amber: '#ff9f0a' };
+  function hexRgb(x) { var n = parseInt(x.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
+  function rgbHex(c) { return '#' + c.map(function (v) { return ('0' + Math.round(Math.max(0, Math.min(255, v))).toString(16)).slice(-2); }).join(''); }
+  function hsvRgb(h, s, v) {
+    var f = function (n) { var k = (n + h / 60) % 6; return v - v * s * Math.max(0, Math.min(k, 4 - k, 1)); };
+    return [f(5) * 255, f(3) * 255, f(1) * 255];
+  }
+  function rgbHsv(c) {
+    var r = c[0] / 255, g = c[1] / 255, b = c[2] / 255, mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn, hh = 0;
+    if (d) { hh = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; hh *= 60; if (hh < 0) hh += 360; }
+    return [hh, mx ? d / mx : 0, mx];
+  }
+  function lum(c) {
+    var a = c.map(function (v) { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); });
+    return .2126 * a[0] + .7152 * a[1] + .0722 * a[2];
+  }
+  function mixTo(c, t, k) { return c.map(function (v, i) { return v + (t[i] - v) * k; }); }
+  function customVars(hex) {
+    var base = hexRgb(hex), ac = base;
+    for (var i = 0; i < 12 && lum(ac) < .12; i++) ac = mixTo(ac, [255, 255, 255], .12);   /* stays readable on the dark site */
+    var fill = ac, on = '#111111';
+    if (lum(ac) < .4) { for (var j = 0; j < 30 && (1.05 / (lum(fill) + .05)) < 4.5; j++) fill = mixTo(fill, [0, 0, 0], .07); on = '#ffffff'; }
+    var rgb = ac.map(Math.round);
+    return { '--ac': rgbHex(ac), '--ac-hi': rgbHex(mixTo(ac, [255, 255, 255], .4)), '--ac-lo': rgbHex(mixTo(ac, [0, 0, 0], .24)),
+      '--ac-fill': rgbHex(fill), '--ac-on': on, '--ac-rgb': rgb.join(','), '--star-tint': mixTo(ac, [255, 255, 255], .8).map(Math.round).join(',') };
+  }
+  function paintAccent() {
+    var root = document.documentElement, keys = ['--ac', '--ac-hi', '--ac-lo', '--ac-fill', '--ac-on', '--ac-rgb', '--star-tint'], tint;
+    root.dataset.accent = S.accent;
+    if (S.accent === 'custom') {
+      var v = customVars(S.custom); tint = v['--star-tint'];
+      keys.forEach(function (k) { root.style.setProperty(k, v[k]); });
+    } else {
+      keys.forEach(function (k) { root.style.removeProperty(k); });
+      tint = ACC_TINT[S.accent] || ACC_TINT.ice;
+    }
+    $$('.sw').forEach(function (b) { b.classList.toggle('is-active', b.dataset.setAccent === S.accent); });
+    set('#ccAccentName', S.accent === 'custom' ? S.custom : S.accent);
+    Star.tint(tint);
+  }
+  var saveT = null;
+  function setCustom(hex) {
+    S.accent = 'custom'; S.custom = hex.toLowerCase(); paintAccent();
+    clearTimeout(saveT); saveT = setTimeout(save, 250);
+  }
   var accTimer = null;
   function setAccent(a) {
     if (S.accent === a) return;
@@ -47,7 +95,6 @@
     body.dataset.dock = S.dock;
     body.dataset.glass = String(S.glass);
     body.dataset.notifs = S.notifs;
-    document.documentElement.dataset.accent = S.accent;
     document.documentElement.style.setProperty('--glass-a', (S.glass / 100).toFixed(3));
     var on = S.stars === 'on', red = S.motion === 'reduced', dk = S.dock === 'on', nt = S.notifs === 'on';
     set('#starsHint', on ? 'On' : 'Off');
@@ -60,14 +107,12 @@
       var on2 = (k === 'stars' && on) || (k === 'motion' && red) || (k === 'dock' && dk) || (k === 'notifs' && nt);
       b.setAttribute('aria-checked', on2 ? 'true' : 'false');
     });
-    $$('.sw').forEach(function (b) { b.classList.toggle('is-active', b.dataset.setAccent === S.accent); });
-    set('#ccAccentName', S.accent);
     if (red) $$('video').forEach(function (v) { v.pause(); });
     else resumeClips();
     paintSlide('glass'); paintSlide('stars'); paintSlide('bright'); paintSlide('vol');
     applyDim(); applyVol();
     segPaint($('#timerSeg'));
-    Star.tint(ACC_TINT[S.accent] || ACC_TINT.ice);
+    paintAccent();
     on && !red ? Star.play() : Star.stop();
   }
   var motionPreference = mq('(prefers-reduced-motion: reduce)');
@@ -537,7 +582,7 @@
     var gen = 0;
     var cmp = document.createElement('div');
     cmp.className = 'cmp'; cmp.setAttribute('aria-hidden', 'true');
-    cmp.innerHTML = '<i class="cmp__plus">+</i><div class="cmp__box"><span class="cmp__txt"></span></div><i class="cmp__send">\u2191</i>';
+    cmp.innerHTML = '<i class="cmp__plus">+</i><div class="cmp__box"><span class="cmp__txt"></span><i class="cmp__send">\u2191</i></div>';
     chat.appendChild(cmp);
     var cmpTxt = cmp.querySelector('.cmp__txt');
     bubbles.forEach(function (b) {
@@ -1165,7 +1210,6 @@
   var acts = {
     'about-mac': function () { $('#aboutMac').hidden = false; },
     'cc': function () { setCCOpen(true); },
-    'spotlight': function () { openSpot(); },
     'restart': function () { try { sessionStorage.removeItem('wr-boot'); } catch (e) {} location.reload(); },
     'resume': function () {
       window.open('public/willson-rai-cv.pdf', '_blank');
@@ -1180,8 +1224,8 @@
     'arrange': function () {
       Scatter.reset();
       $$('.win--float').forEach(function (w) {
-        w.classList.remove('is-zoom', 'is-dragging');
-        w.style.position = ''; w.style.left = ''; w.style.top = ''; w.style.right = ''; w.style.bottom = '';
+        w.classList.remove('is-zoom', 'is-dragging', 'is-placed');
+        w.style.translate = ''; w.style.position = ''; w.style.left = ''; w.style.top = ''; w.style.right = ''; w.style.bottom = '';
         w.style.margin = ''; w.style.transform = ''; w.style.animation = '';
       });
       WM.restoreAll();
@@ -1218,7 +1262,6 @@
       base.push({ sep: 1 });
     }
     base.push({ l: 'Restore All Windows', a: WM.restoreAll });
-    base.push({ l: 'Spotlight Search', h: '⌘␣', a: openSpot });
     base.push({ l: 'Ask the Assistant', h: '⌘K', a: function () { Chat.toggle(true); } });
     base.push({ sep: 1 });
     base.push({ l: 'Download CV', h: '⌘S', a: acts.resume });
@@ -1418,16 +1461,25 @@
   function draggable(el, handle, mode) {
     if (!handle) return;
     var sx, sy, ox, oy, dx = 0, dy = 0, drag = false;
+    var isFloat = el.classList.contains('win--float'), cw = 0, ch = 0;
     handle.addEventListener('pointerdown', function (e) {
       if (reduce) return;
       /* the phone rail is a scroll strip, not a drag surface */
-      if (e.pointerType === 'touch' && el.closest && el.closest('.mobile-widget-rail')) return;
+      if (el.closest && el.closest('.mobile-widget-rail')) return;
       if (e.target.closest('.tl') || e.target.closest('.win__x') || e.target.closest('button')) return;
       drag = true; front(el);
       var r = el.getBoundingClientRect();
       sx = e.clientX; sy = e.clientY;
       if (mode === 'shift') { dx = parseFloat(el.dataset.dx || 0); dy = parseFloat(el.dataset.dy || 0); }
-      else {
+      else if (isFloat) {
+        /* desk widgets live inside the hero: they are positioned against it, so they stay where they are dropped and scroll away with the page */
+        var box = el.offsetParent || el.parentElement, c = box.getBoundingClientRect();
+        el.style.animation = 'none'; el.style.translate = 'none'; el.style.margin = '0'; el.style.transform = 'none';
+        var r1 = el.getBoundingClientRect();
+        ox = r.left + r.width / 2 - r1.width / 2 - c.left; oy = r.top + r.height / 2 - r1.height / 2 - c.top;
+        cw = Math.max(0, c.width - r1.width); ch = Math.max(0, c.height - r1.height);
+        el.style.left = ox + 'px'; el.style.top = oy + 'px'; el.style.right = 'auto'; el.style.bottom = 'auto';
+      } else {
         el.style.left = r.left + 'px'; el.style.top = r.top + 'px';
         el.style.position = 'fixed'; el.style.right = 'auto'; el.style.bottom = 'auto';
         el.style.margin = '0'; el.style.transform = 'none'; el.style.animation = 'none';
@@ -1443,14 +1495,19 @@
         dx += e.movementX || 0; dy += e.movementY || 0;
         el.dataset.dx = dx; el.dataset.dy = dy;
         el.style.transform = 'translate(' + dx.toFixed(1) + 'px,' + dy.toFixed(1) + 'px) scale(1.015)';
+      } else if (isFloat) {
+        el.style.left = Math.max(0, Math.min(cw, ox + e.clientX - sx)) + 'px';
+        el.style.top = Math.max(0, Math.min(ch, oy + e.clientY - sy)) + 'px';
       } else {
         el.style.left = (ox + e.clientX - sx) + 'px';
         el.style.top = Math.max(34, oy + e.clientY - sy) + 'px';
       }
     });
     var end = function () {
+      if (!drag) return;
       drag = false; el.classList.remove('is-dragging');
       if (mode === 'fixed') el.style.transform = '';
+      if (isFloat) el.classList.add('is-placed');
     };
     handle.addEventListener('pointerup', end);
     handle.addEventListener('pointercancel', end);
@@ -1532,7 +1589,7 @@
       requestAnimationFrame(function () {
         ticking = false;
         floats.forEach(function (f, i) {
-          if (f.classList.contains('is-dragging')) return;
+          if (f.classList.contains('is-dragging') || f.classList.contains('is-placed')) return;
           var k = (i + 1) * 6;
           f.style.translate = (px * k).toFixed(1) + 'px ' + (py * k).toFixed(1) + 'px';
         });
@@ -1736,7 +1793,6 @@
   document.addEventListener('keydown', function (e) {
     var k = e.key.toLowerCase();
     var typing = /^(input|textarea)$/i.test((e.target.tagName || ''));
-    if ((e.metaKey || e.ctrlKey) && e.code === 'Space') { e.preventDefault(); openSpot(); return; }
     if ((e.metaKey || e.ctrlKey) && k === 'k') { e.preventDefault(); Chat.toggle(true); return; }
     if ((e.metaKey || e.ctrlKey) && k === 's' && !typing) { e.preventDefault(); acts.resume(); return; }
     if ((e.metaKey || e.ctrlKey) && e.ctrlKey && k === 'f') { e.preventDefault(); fullscreen(); return; }
@@ -1748,7 +1804,6 @@
       closeMenus(); closeCC();
       return;
     }
-    if (k === '/' && !typing && spot.hidden) { e.preventDefault(); openSpot(); }
   });
   if (dlgEl) dlgEl.addEventListener('click', function (e) { if (e.target === dlgEl) dlgEl.hidden = true; });
   document.addEventListener('click', function (e) {
@@ -1844,6 +1899,131 @@
     if (media.addEventListener) media.addEventListener('change', sync);
     else if (media.addListener) media.addListener(sync);
   })();
+
+
+  /* ─────────── colour wheels: spin when the pointer is near, open the colour panel on their own ─────────── */
+  (function () {
+    var wheels = $$('.cwheel'), pick = $('#cpick');
+    if (!wheels.length || !pick) return;
+    var disc = $('#cpDisc'), dot = $('#cpDot'), val = $('#cpVal'), hexEl = $('#cpHex'), prev = $('#cpPrev');
+    var H = 210, Sa = 1, V = 1, openFor = null, pinned = false, dwell = null, closeT = null, openY = 0, raf = 0, pt = null, dragging = false;
+    var NEAR = 96, TRIGGER = 52;
+
+    function fromAccent() {
+      var c = rgbHsv(hexRgb(S.accent === 'custom' ? S.custom : ACC_HEX[S.accent] || ACC_HEX.ice));
+      H = c[0]; Sa = c[1]; V = c[2];
+    }
+    function paintUI() {
+      var R = disc.clientWidth / 2, a = H * Math.PI / 180;
+      dot.style.transform = 'translate(' + (R + Sa * R * Math.sin(a)).toFixed(1) + 'px,' + (R - Sa * R * Math.cos(a)).toFixed(1) + 'px)';
+      var cur = rgbHex(hsvRgb(H, Sa, V));
+      disc.style.setProperty('--cp-dim', (1 - V).toFixed(3));
+      pick.style.setProperty('--cp-full', rgbHex(hsvRgb(H, Sa, 1)));
+      pick.style.setProperty('--cp-cur', cur);
+      val.value = Math.round(V * 100);
+      hexEl.textContent = cur.toUpperCase();
+    }
+    function commit() { paintUI(); setCustom(rgbHex(hsvRgb(H, Sa, V))); }
+
+    function fromPt(e) {
+      var r = disc.getBoundingClientRect(), R = r.width / 2, x = e.clientX - r.left - R, y = e.clientY - r.top - R;
+      var a = Math.atan2(x, -y) * 180 / Math.PI; if (a < 0) a += 360;
+      H = a; Sa = Math.min(1, Math.hypot(x, y) / R); commit();
+    }
+    disc.addEventListener('pointerdown', function (e) {
+      dragging = true; pinned = true;
+      try { disc.setPointerCapture(e.pointerId); } catch (err) {}
+      fromPt(e); e.preventDefault();
+    });
+    disc.addEventListener('mousedown', function (e) { e.preventDefault(); });
+    disc.addEventListener('pointermove', function (e) { if (dragging) fromPt(e); });
+    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(function (n) { disc.addEventListener(n, function () { dragging = false; }); });
+    disc.addEventListener('keydown', function (e) {
+      var k = e.key, used = true;
+      if (k === 'ArrowRight') H = (H + 4) % 360;
+      else if (k === 'ArrowLeft') H = (H + 356) % 360;
+      else if (k === 'ArrowUp') Sa = Math.min(1, Sa + .04);
+      else if (k === 'ArrowDown') Sa = Math.max(0, Sa - .04);
+      else used = false;
+      if (used) { e.preventDefault(); pinned = true; commit(); }
+    });
+    val.addEventListener('input', function () { V = val.value / 100; pinned = true; commit(); });
+    pick.addEventListener('pointerdown', function () { pinned = true; clearTimeout(closeT); closeT = null; });
+    pick.addEventListener('click', function (e) { if (e.target.closest('.sw')) setTimeout(function () { fromAccent(); paintUI(); }, 0); });
+    $('#cpickClose').addEventListener('click', close);
+
+    function place(w) {
+      if (innerWidth <= 760) { pick.style.left = ''; pick.style.top = ''; return; }
+      var r = w.getBoundingClientRect(), pw = pick.offsetWidth, ph = pick.offsetHeight;
+      var left = r.right + 14; if (left + pw > innerWidth - 12) left = r.left - 14 - pw;
+      var top = Math.min(Math.max(r.top + r.height / 2 - 70, 56), Math.max(56, innerHeight - ph - 12));
+      pick.style.left = Math.max(12, left) + 'px'; pick.style.top = top + 'px';
+    }
+    function open(w, pin) {
+      clearTimeout(closeT); closeT = null;
+      if (openFor === w) { if (pin) pinned = true; return; }
+      fromAccent();
+      pick.hidden = false; place(w); paintUI();
+      requestAnimationFrame(function () { pick.classList.add('is-open'); });
+      openFor = w; pinned = !!pin; openY = window.scrollY;
+      wheels.forEach(function (x) { x.setAttribute('aria-expanded', x === w ? 'true' : 'false'); x.classList.toggle('is-active', x === w); });
+    }
+    function close() {
+      clearTimeout(closeT); closeT = null; clearTimeout(dwell); dwell = null;
+      if (!openFor) return;
+      openFor = null; pinned = false; dragging = false;
+      pick.classList.remove('is-open');
+      wheels.forEach(function (x) { x.setAttribute('aria-expanded', 'false'); x.classList.remove('is-active'); });
+      setTimeout(function () { if (!openFor) pick.hidden = true; }, 200);
+    }
+
+    function inside(r, p, pad) { return p.x >= r.left - pad && p.x <= r.right + pad && p.y >= r.top - pad && p.y <= r.bottom + pad; }
+    function tick() {
+      raf = 0; if (!pt) return;
+      var best = null, bd = 1e9;
+      wheels.forEach(function (w) {
+        var r = w.getBoundingClientRect(), d = Math.hypot(pt.x - (r.left + r.width / 2), pt.y - (r.top + r.height / 2));
+        w.classList.toggle('is-near', d < NEAR);
+        if (d < bd) { bd = d; best = w; }
+      });
+      var overPanel = openFor && inside(pick.getBoundingClientRect(), pt, 10);
+      if (bd < TRIGGER) {
+        clearTimeout(closeT); closeT = null;
+        if (openFor !== best && !dwell) { dwell = setTimeout(function () { dwell = null; open(best, false); }, 260); }
+      } else {
+        if (dwell) { clearTimeout(dwell); dwell = null; }
+        if (openFor && !pinned && !overPanel) { if (!closeT) closeT = setTimeout(close, 900); }
+        else if (closeT) { clearTimeout(closeT); closeT = null; }
+      }
+    }
+    window.addEventListener('pointermove', function (e) {
+      if (e.pointerType !== 'mouse') return;
+      pt = { x: e.clientX, y: e.clientY };
+      if (!raf) raf = requestAnimationFrame(tick);
+    }, { passive: true });
+
+    wheels.forEach(function (w) {
+      w.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (openFor === w && pinned) close(); else { openFor === w ? (pinned = true) : open(w, true); }
+      });
+    });
+    document.addEventListener('pointerdown', function (e) {
+      if (openFor && !e.target.closest('#cpick') && !e.target.closest('.cwheel')) close();
+    });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && openFor) close(); });
+    window.addEventListener('scroll', function () { if (openFor && Math.abs(window.scrollY - openY) > 140) close(); }, { passive: true });
+    window.addEventListener('resize', close);
+  })();
+
+  /* keep dropped desk widgets inside the hero if the window is resized */
+  window.addEventListener('resize', function () {
+    $$('.win--float.is-placed').forEach(function (w) {
+      var box = w.offsetParent; if (!box) return;
+      w.style.left = Math.max(0, Math.min(box.clientWidth - w.offsetWidth, parseFloat(w.style.left) || 0)) + 'px';
+      w.style.top = Math.max(0, Math.min(box.clientHeight - w.offsetHeight, parseFloat(w.style.top) || 0)) + 'px';
+    });
+  });
 
   /* ─────────── init ─────────── */
   applyState();
