@@ -13,14 +13,17 @@
   var EMAIL = 'resume@willsonrai.com.np';
   var PHONE = '+9779765829096';
   function noop() {}
+  var resumeClips = noop; /* the video module owns clip lifecycle; settings only ask */
 
   /* ─────────── prefs ─────────── */
-  var S = { stars: 'on', motion: reduce ? 'reduced' : 'full', dock: 'on', glass: 8, accent: 'ice', density: 150, notifs: 'on', bright: 100, vol: 0 };
+  var S = { stars: 'on', motion: reduce ? 'reduced' : 'full', dock: 'on', glass: 8, accent: 'ice', density: 150, notifs: 'on', bright: 100, vol: 0, lastVol: 40 };
   try {
     var saved = JSON.parse(localStorage.getItem('wr-cosmos') || '{}');
     Object.keys(saved).forEach(function (k) { if (k in S) S[k] = saved[k]; });
     S.glass = Math.max(8, Math.min(20, +S.glass || 8));
     S.density = Math.max(40, Math.min(300, +S.density || 150));
+    S.vol = Math.max(0, Math.min(100, +S.vol || 0));
+    S.lastVol = Math.max(1, Math.min(100, +S.lastVol || 40));
   } catch (e) {}
   // The operating-system accessibility preference wins on page load; the site switch can still override it for this session.
   if (reduce) S.motion = 'reduced';
@@ -58,10 +61,8 @@
     });
     $$('.sw').forEach(function (b) { b.classList.toggle('is-active', b.dataset.setAccent === S.accent); });
     set('#ccAccentName', S.accent);
-    $$('video').forEach(function (v) {
-      if (red) v.pause();
-      else if (v.muted && v.hasAttribute('autoplay') && v.paused) { var pr = v.play(); if (pr && pr.catch) pr.catch(noop); }
-    });
+    if (red) $$('video').forEach(function (v) { v.pause(); });
+    else resumeClips();
     paintSlide('glass'); paintSlide('stars'); paintSlide('bright'); paintSlide('vol');
     applyDim(); applyVol();
     segPaint($('#timerSeg'));
@@ -84,9 +85,24 @@
     var v = S.vol / 100;
     $$('video').forEach(function (el) { el.volume = v; el.muted = S.vol === 0; });
     set('#ccClipAudioState', S.vol === 0 ? 'muted by default' : 'site sound · ' + S.vol + '%');
-    var rm = $('#reelMute');
-    if (rm) { rm.setAttribute('aria-pressed', String(S.vol > 0)); rm.setAttribute('aria-label', S.vol > 0 ? 'Mute video' : 'Unmute video'); }
+    paintMute(S.vol > 0);
     set('#ccVol', S.vol + '%');
+    var tile = $('.ccsl[data-slide="vol"]');
+    if (tile) tile.setAttribute('aria-valuetext', S.vol === 0 ? 'muted' : S.vol + ' percent');
+  }
+  /* One shared sound level for every clip; unmuting from a video button restores the last level. */
+  function setVolume(next, remember) {
+    next = Math.max(0, Math.min(100, Math.round(next)));
+    if (remember !== false && next > 0) S.lastVol = next;
+    S.vol = next; save(); applyVol();
+  }
+  function paintMute(on) {
+    $$('.video-mute').forEach(function (b) {
+      b.setAttribute('aria-pressed', String(on));
+      b.setAttribute('aria-label', on ? 'Mute video' : 'Unmute video');
+      b.title = on ? 'Mute all clips' : 'Unmute all clips';
+      b.classList.toggle('is-on', on);
+    });
   }
 
   /* ─────────── live menubar status ─────────── */
@@ -128,30 +144,148 @@
     } else batteryUnavailable();
   })();
 
-  /* ─────────── heyclicky-style glass play-cta ─────────── */
+  /* ─────────── Heyclicky-style glass video controls ─────────── */
   (function () {
-    var TRI = '<svg viewBox="0 0 24 24" width="24" height="24"><path d="M8.5 5.6 18 12l-9.5 6.4z" fill="currentColor"/></svg>';
+    var ICONS = {
+      play: '<svg viewBox="0 0 24 24" width="24" height="24"><path d="M8.5 5.6 18 12l-9.5 6.4z" fill="currentColor"/></svg>',
+      pause: '<svg viewBox="0 0 24 24" width="24" height="24"><path d="M8.6 5.8v12.4M15.4 5.8v12.4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>',
+      sound: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.4L12 18.6V5.4L7.4 9.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M15.5 9.5a4 4 0 0 1 0 5M18 7.4a7 7 0 0 1 0 9.2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
+      mute: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.4L12 18.6V5.4L7.4 9.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m16 9.6 4.4 4.8M20.4 9.6 16 14.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>'
+    };
+    var wired = [], active = null;
+    function soundOn() { return S.vol > 0; }
+    function paint() {
+      wired.forEach(function (w) {
+        var playing = !w.vid.paused && !w.vid.ended;
+        var t = $('.tri', w.btn), label = $('.play-label', w.btn);
+        if (t) t.innerHTML = playing ? ICONS.pause : ICONS.play;
+        if (label) label.textContent = playing ? 'pause video' : 'play video';
+        w.btn.classList.toggle('is-playing', playing);
+        w.btn.setAttribute('aria-label', playing ? 'Pause video' : 'Play video');
+        w.btn.setAttribute('aria-pressed', String(playing));
+        if (w.shell) w.shell.classList.toggle('is-paused', !playing);
+        if (w.mute && w.mute.dataset.on !== String(soundOn())) {
+          w.mute.dataset.on = String(soundOn());
+          w.mute.innerHTML = soundOn() ? ICONS.sound : ICONS.mute;
+        }
+      });
+      paintMute(soundOn());
+    }
+    function playingNow() {
+      for (var i = 0; i < wired.length; i++) if (!wired[i].vid.paused && !wired[i].vid.ended) return wired[i];
+      return null;
+    }
+    /* the clip nearest the middle of the screen owns playback — same rule the desk windows use */
+    function focused() {
+      var mid = (window.innerHeight || 0) / 2, best = null, bd = 1e9;
+      wired.forEach(function (w) {
+        if (!w.want) return;
+        var r = w.vid.getBoundingClientRect();
+        if (r.bottom <= 0 || r.top >= (window.innerHeight || 0)) return;
+        var d = Math.abs(r.top + r.height / 2 - mid);
+        if (d < bd) { bd = d; best = w; }
+      });
+      return best;
+    }
+    function play(w) {
+      if (!w || playingNow() === w) return;
+      active = w;
+      var p;
+      try { p = w.vid.play(); }
+      catch (err) { return; }
+      if (p && p.catch) p.catch(noop);
+    }
+    function hold(w) {
+      if (!w) return;
+      active = w;
+      w.want = true;
+      if (w.vid.paused && !w.vid.ended) play(w);
+    }
+    /* one clip plays: whichever the viewer is looking at, or the one they last chose */
+    function reconcile() {
+      if (S.motion === 'reduced') return;
+      var cur = playingNow(), focus = focused();
+      if (cur && focus === cur) return;
+      if (cur && !focus) { try { cur.vid.pause(); } catch (err) {} return; }
+      if (cur && focus !== cur) { try { cur.vid.pause(); } catch (err) {} }
+      play(focus);
+    }
+    function stopOthers(w) {
+      wired.forEach(function (o) {
+        if (o === w) return;
+        o.want = false;
+        if (!o.vid.paused) { try { o.vid.pause(); } catch (err) {} }
+      });
+    }
+    /* Opening a clip with sound is fine after a user gesture — starting sound unprompted is not. */
+    function selectSound() {
+      if (soundOn()) return;
+      setVolume(S.lastVol);
+      flash('Sound on · ' + S.lastVol + '% — mute any time');
+    }
+    function start(w, announce) {
+      stopOthers(w);
+      w.want = true;
+      if (w.vid.paused || w.vid.ended) {
+        var p;
+        try { p = w.vid.play(); }
+        catch (err) { if (announce) flash('This video could not start. Tap to try again.'); return; }
+        if (p && p.catch) p.catch(function () { if (announce) flash('This video could not start. Tap to try again.'); });
+      }
+      active = w;
+    }
+    function toggle(w, announce) {
+      if (!w.vid.paused && !w.vid.ended) { w.want = false; w.vid.pause(); return; }
+      selectSound();
+      start(w, announce);
+    }
+
     function wire(btn, vid) {
       if (!btn || !vid) return;
-      function paint() {
-        var playing = !vid.paused;
-        var t = $('.tri', btn), label = $('.play-label', btn);
-        if (t) t.innerHTML = TRI;
-        if (label) label.textContent = 'play video';
-        btn.classList.toggle('is-playing', playing);
-        btn.setAttribute('aria-label', playing ? 'Pause video' : 'Play video');
-        btn.setAttribute('aria-pressed', String(playing));
-      }
-      btn.addEventListener('click', function () {
-        if (vid.paused) { var p = vid.play(); if (p && p.catch) p.catch(noop); } else vid.pause();
+      var shell = btn.closest('.hero-video__frame,.video-card__frame,.poster');
+      var w = { btn: btn, vid: vid, shell: shell, want: vid.hasAttribute('autoplay'), mute: shell ? $('.video-mute', shell) : null };
+      wired.push(w);
+      btn.addEventListener('click', function (e) {
+        e.preventDefault(); e.stopPropagation();
+        toggle(w, true);
       });
-      vid.addEventListener('play', paint); vid.addEventListener('pause', paint);
-      paint();
+      /* the plate itself is a play/pause surface too */
+      vid.addEventListener('click', function () { toggle(w, true); });
+      if (w.mute) w.mute.addEventListener('click', function (e) {
+        e.preventDefault(); e.stopPropagation();
+        setVolume(soundOn() ? 0 : S.lastVol);
+      });
+      /* the browser autostarts muted clips on its own: only the clip holding playback may run */
+      vid.addEventListener('play', function () {
+        if (!active || active.vid !== vid) { try { vid.pause(); } catch (err) {} }
+      });
+      ['play', 'playing', 'pause', 'ended'].forEach(function (ev) { vid.addEventListener(ev, paint); });
     }
+
     wire($('#reelCta'), $('#reelVid'));
     wire($('#beansCta'), $('#beansVid'));
     wire($('#frameCta'), $('#latteVid'));
-    wire($('#posterCta'), $('.poster__vid'));
+    wire($('#posterCta'), $('#posterVideo'));
+
+    /* clips take turns as they pass the middle of the screen, and pause off-screen */
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function () { reconcile(); }, { threshold: 0 });
+      wired.forEach(function (w) { io.observe(w.vid); });
+    }
+    var rafP = false;
+    window.addEventListener('scroll', function () {
+      if (rafP) return; rafP = true;
+      requestAnimationFrame(function () { rafP = false; reconcile(); });
+    }, { passive: true });
+
+    /* the settings panel asks for one clip back, not the whole floor */
+    resumeClips = function () {
+      var w = (active && active.want) ? active : focused();
+      if (w) hold(w); else reconcile();
+    };
+
+    paint();
+    applyVol();
   })();
 
   /* ─────────── toast (tiny feedback) ─────────── */
@@ -489,6 +623,7 @@
         { duration: reduce ? 1 : 320, easing: 'cubic-bezier(.22,.61,.36,1)' }) : null;
     }
     function restoreAll() {
+      if (Sticky && Sticky.home) Sticky.home();
       var n = 0;
       list.forEach(function (w) { if (w.state !== 'open') { n++; restore(w.id); } });
       flash(n ? n + ' window' + (n > 1 ? 's' : '') + ' restored' : 'every window is already open');
@@ -806,7 +941,7 @@
     $$('li[data-i]', spotList).forEach(function (li, i) { li.classList.toggle('is-sel', i === sel); });
     var cur = $('li.is-sel', spotList); if (cur && cur.scrollIntoView) cur.scrollIntoView({ block: 'nearest' });
   }
-  var spotButtons = [$('#spotBtn'), $('#mobileSpotBtn')].filter(Boolean);
+  var spotButtons = [$('#spotBtn')].filter(Boolean);
   function runSel() { var r = results[sel]; if (!r) return; closeSpot(); r.act(); }
   function openSpot() {
     closeMenus(); closeCC(); spot.hidden = false; spotInput.value = ''; renderSpot('');
@@ -873,21 +1008,6 @@
     })();
   })();
 
-  /* ─────────── hero video sound toggle ─────────── */
-  (function () {
-    var v = $('#reelVid'), mute = $('#reelMute');
-    if (!v) return;
-    v.addEventListener('click', function () {
-      if (v.paused) { var p = v.play(); if (p && p.catch) p.catch(noop); }
-      else v.pause();
-    });
-    if (mute) mute.addEventListener('click', function () {
-      v.muted = !v.muted;
-      mute.setAttribute('aria-pressed', String(!v.muted));
-      mute.setAttribute('aria-label', v.muted ? 'Unmute video' : 'Mute video');
-    });
-  })();
-
   /* ─────────── dock ─────────── */
   $$('.dapp').forEach(function (app) {
     app.addEventListener('click', function () {
@@ -948,7 +1068,9 @@
     if (!handle) return;
     var sx, sy, ox, oy, dx = 0, dy = 0, drag = false;
     handle.addEventListener('pointerdown', function (e) {
-      if (reduce || e.pointerType === 'touch') return;
+      if (reduce) return;
+      /* the phone rail is a scroll strip, not a drag surface */
+      if (e.pointerType === 'touch' && el.closest && el.closest('.mobile-widget-rail')) return;
       if (e.target.closest('.tl') || e.target.closest('.win__x') || e.target.closest('button')) return;
       drag = true; front(el);
       var r = el.getBoundingClientRect();
@@ -975,7 +1097,10 @@
         el.style.top = Math.max(34, oy + e.clientY - sy) + 'px';
       }
     });
-    var end = function () { drag = false; el.classList.remove('is-dragging'); };
+    var end = function () {
+      drag = false; el.classList.remove('is-dragging');
+      if (mode === 'fixed') el.style.transform = '';
+    };
     handle.addEventListener('pointerup', end);
     handle.addEventListener('pointercancel', end);
     handle.addEventListener('lostpointercapture', end);
@@ -1298,6 +1423,44 @@
     }, 95);
     el.addEventListener('click', function () { clearInterval(tick); body.classList.add('booted'); el.remove(); });
   }
+
+  /* ─────────── the desk sticky note: quick launch for the three clips ─────────── */
+  var Sticky = (function () {
+    var el = $('#winStickies');
+    if (!el) return { home: noop };
+    var body = $('.win__body', el);
+    var HOME = el.getAttribute('style') || '';
+    /* "Restore All Windows" also puts a dragged note back on the desk */
+    function home() {
+      el.setAttribute('style', HOME);
+      el.dataset.dx = 0; el.dataset.dy = 0;
+    }
+    if (body) {
+      var pills = document.createElement('div');
+      pills.className = 'sticky-pills';
+      pills.setAttribute('role', 'group');
+      pills.setAttribute('aria-label', 'Play a clip from the note');
+      [['latte', 'latte art'], ['beans', 'beans fall'], ['reel', 'v60 pour']].forEach(function (clip) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.dataset.stickyClip = clip[0];
+        b.textContent = clip[1];
+        b.setAttribute('aria-label', 'Play the ' + clip[1] + ' clip');
+        pills.appendChild(b);
+      });
+      pills.addEventListener('click', function (e) {
+        var b = e.target.closest('button[data-sticky-clip]');
+        if (!b) return;
+        var pair = { latte: ['#latteVid', '#frameCta'], beans: ['#beansVid', '#beansCta'], reel: ['#reelVid', '#reelCta'] }[b.dataset.stickyClip];
+        var vid = $(pair[0]), cta = $(pair[1]);
+        if (!vid) return;
+        if (vid.paused || vid.ended) { if (cta) cta.click(); else vid.play(); }
+        if (vid.scrollIntoView) vid.scrollIntoView({ behavior: S.motion === 'reduced' ? 'auto' : 'smooth', block: 'center' });
+      });
+      body.appendChild(pills);
+    }
+    return { home: home };
+  })();
 
   /* ─────────── phone layout: move the three desk widgets out of the hero ─────────── */
   (function placeMobileWidgets() {

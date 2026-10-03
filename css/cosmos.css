@@ -1411,6 +1411,8 @@ body[data-motion="reduced"] .pitcher-mark{ animation:none; }
 .video-mute:hover{ background:rgba(255,255,255,.2); transform:scale(1.06); }
 .video-mute:active{ transform:scale(.94); }
 @media (max-width:760px){ .video-mute{ right:9px; bottom:9px; width:33px; height:33px; } }
+/* On phones the poster's play pill sits bottom-right too — keep the two controls in their own corners. */
+@media (max-width:760px){ .poster .playround{ right:56px; } }
 
 /* Heyclicky-inspired status strip and phone dashboard, branded as site tools. */
 .cc__statusline{ display:flex; align-items:center; justify-content:space-between; gap:9px; margin:0 2px 12px; }
@@ -1481,14 +1483,31 @@ body[data-motion="reduced"] .pitcher-mark{ animation:none; }
 .menubar__right .status-item--wifi{ order:3; }.menubar__right .status-item--audio{ order:4; }
 .menubar__right .status-item--bluetooth{ order:5; }.menubar__right .status-item--battery{ order:6; }
 .menubar__right #clock{ order:7; }.menubar__right .getclicky{ order:8; }
-.mbtn--search{ display:inline-flex; align-items:center; gap:6px; padding:5px 10px; border:1px solid var(--stroke-2); border-radius:999px;
-  color:var(--ink-2); background:var(--g-1); font-size:12px; letter-spacing:0; transition:color .16s var(--ease),background .16s var(--ease),border-color .16s var(--ease); }
-.mbtn--search:hover{ color:var(--ink); background:var(--g-2); border-color:var(--stroke); }
-.mbtn--search svg{ width:15px; height:15px; flex:0 0 auto; }
+
+/* ════════ STICKY NOTE + DESK WIDGET POLISH ════════ */
+/* The note doubles as a quiet launcher so the desk clips are one tap away. */
+.sticky-pills{ display:flex; flex-wrap:wrap; gap:5px; margin-top:4px }
+.sticky-pills button{ padding:3px 8px; border:1px solid rgba(74,56,6,.3); border-radius:999px; background:rgba(255,255,255,.34);
+  font-family:var(--mono); font-size:9px; letter-spacing:.045em; text-transform:lowercase; color:#4a3806; cursor:pointer;
+  transition:background .16s var(--ease),transform .16s var(--ease) }
+.sticky-pills button:hover{ background:rgba(255,255,255,.68) }
+.sticky-pills button:active{ transform:scale(.95) }
+.sticky-pills button:focus-visible{ outline:2px solid rgba(74,56,6,.55); outline-offset:1px }
+
+/* Desk widgets drag with any pointer; the bar advertises it and the phone rail keeps scrolling. */
+.win--float .win__bar{ cursor:grab }
+.win--float.is-dragging .win__bar{ cursor:grabbing }
+.hero__floats .win__bar{ touch-action:none }
+
+/* Sound is a shared setting: filled glass = this page has audio on. */
+.video-mute.is-on{ border-color:rgba(255,255,255,.44); background:rgba(255,255,255,.22) }
+
+/* The phone rail scrolls sideways: say so, and let a keyboard reach it. */
+.mobile-widget-rail__hint{ display:none }
+.mobile-widget-rail:focus-visible{ outline:2px solid var(--ac-a55); outline-offset:4px; border-radius:14px }
 @media (max-width:760px){
-  .mobile-header__search{ display:grid; place-items:center; width:36px; height:36px; flex:0 0 auto; padding:0; border:1px solid rgba(255,255,255,.12);
-    border-radius:12px; color:var(--ink-2); background:rgba(255,255,255,.055); cursor:pointer; transition:background .16s var(--ease),color .16s var(--ease),transform .16s var(--ease); }
-  .mobile-header__search svg{ width:18px; height:18px; display:block; }
-  .mobile-header__search:hover,.mobile-header__search:focus-visible{ color:var(--ink); background:var(--ac-a14); }
-  .mobile-header__search:active{ transform:scale(.95); }
+  .mobile-widget-rail__hint{ display:block; margin:9px 18px 0; text-align:center; font-family:var(--mono);
+    font-size:10.5px; line-height:1.5; color:var(--ink-3); }
+  .mobile-widget-rail .sticky-pills{ gap:4px }
+  .mobile-widget-rail .sticky-pills button{ padding:2px 6px; font-size:8px }
 }
