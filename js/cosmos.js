@@ -639,26 +639,6 @@
     window.addEventListener('resize', upd); upd();
   })();
 
-  /* ─────────── header: a slice of the same cosmos background, so the colour matches exactly (no stars) ─────────── */
-  (function () {
-    var cos = document.querySelector('.cosmos'), st = document.getElementById('stars');
-    if (!cos || !st) return;
-    var strip = document.createElement('div'); strip.className = 'hdr-strip'; strip.setAttribute('aria-hidden', 'true');
-    var inner = cos.cloneNode(true);
-    [inner].concat($$('[id]', inner)).forEach(function (n) { n.removeAttribute('id'); });
-    var cv = inner.querySelector('canvas'); if (cv) cv.remove(); /* colour only: no stars in the header */
-    strip.appendChild(inner); document.body.insertBefore(strip, document.body.firstChild);
-    var mq = window.matchMedia('(max-width: 760px)'), hh = 56;
-    function size() {
-      var hdr = document.querySelector(mq.matches ? '.mobile-header' : '#menubar'); if (!hdr) return;
-      hh = Math.round(hdr.getBoundingClientRect().height) || 56;
-      var cr = cos.getBoundingClientRect();
-      strip.style.height = hh + 'px'; inner.style.width = cr.width + 'px'; inner.style.height = cr.height + 'px';
-    }
-    size(); window.addEventListener('resize', size); window.addEventListener('orientationchange', size);
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(size);
-  })();
-
   /* ─────────── toast (tiny feedback) ─────────── */
   function flash(msg) {
     var el = $('.toast');
