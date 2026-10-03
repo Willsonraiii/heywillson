@@ -83,7 +83,7 @@
 </script>
 <link rel="preload" href="fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="preload" href="fonts/geist-mono-var.woff2" as="font" type="font/woff2" crossorigin />
-<link rel="stylesheet" href="css/cosmos.css" />
+<link rel="stylesheet" href="css/cosmos.css?v=2026-10-03" />
 <script>
   (function(){ try{ if (sessionStorage.getItem('wr-boot')) document.documentElement.classList.add('no-boot'); }catch(e){} })();
 </script>
@@ -440,7 +440,7 @@
         <div class="hero-video__frame">
           <video id="reelVid" src="images/clips/v60-pour.mp4" muted loop autoplay playsinline preload="metadata" aria-label="Pouring a V60 behind the bar"></video>
           <button class="playround" id="reelCta" type="button" aria-controls="reelVid" aria-label="Toggle video playback"><span class="gloss" aria-hidden="true"></span><span class="tri"></span><span class="play-label">play video</span></button>
-          <button class="video-mute" id="reelMute" type="button" aria-label="Unmute video" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.4L12 18.6V5.4L7.4 9.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M15.5 9.5a4 4 0 0 1 0 5M18 7.4a7 7 0 0 1 0 9.2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button>
+          <button class="video-mute" id="reelMute" type="button" aria-pressed="false" aria-label="Unmute video"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.4L12 18.6V5.4L7.4 9.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M15.5 9.5a4 4 0 0 1 0 5M18 7.4a7 7 0 0 1 0 9.2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button>
         </div>
         <figcaption class="hero-video__meta"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4.5 2.5h7l4 4v11h-11z" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/><path d="M11.5 2.7v4h4M7 10h6M7 13h6" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg><span>bloom.mov</span></figcaption>
       </figure>
@@ -620,12 +620,14 @@
   </section>
 
   <!-- On phones, the three desktop desk widgets move here and stay grouped. -->
-  <div class="mobile-widget-rail" id="mobileWidgetRail" aria-label="Coffee desk widgets"></div>
+  <div class="mobile-widget-rail" id="mobileWidgetRail" tabindex="0" aria-label="Coffee desk widgets" aria-describedby="railHint"></div>
+  <p class="mobile-widget-rail__hint" id="railHint">swipe the desk cards — clock, brew timer, sticky note</p>
 
   <!-- POSTER -->
   <section class="poster" id="poster">
     <video class="poster__vid" id="posterVideo" src="images/clips/latte-art.mp4" muted loop autoplay playsinline preload="metadata" aria-hidden="true" tabindex="-1"></video>
     <button class="playround playround--poster" id="posterCta" type="button" aria-controls="posterVideo" aria-label="Toggle video playback"><span class="gloss" aria-hidden="true"></span><span class="tri"></span><span class="play-label">play video</span></button>
+    <button class="video-mute" type="button" aria-pressed="false" aria-label="Unmute video"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.4L12 18.6V5.4L7.4 9.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m16 9.6 4.4 4.8M20.4 9.6 16 14.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button>
     <span class="poster__shade" aria-hidden="true"></span>
     <div class="poster__copy">
       <h2>a 25-second extraction, a golden crema, and a story in every sip.</h2>
@@ -712,6 +714,7 @@
         <div class="video-card__frame">
           <video id="beansVid" src="images/clips/beans-fall.mp4" muted loop autoplay playsinline preload="metadata" aria-label="Coffee beans tumbling into the grinder"></video>
           <button class="playround" id="beansCta" type="button" aria-controls="beansVid" aria-label="Toggle video playback"><span class="gloss" aria-hidden="true"></span><span class="tri"></span><span class="play-label">play video</span></button>
+          <button class="video-mute" type="button" aria-pressed="false" aria-label="Unmute video"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.4L12 18.6V5.4L7.4 9.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m16 9.6 4.4 4.8M20.4 9.6 16 14.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button>
         </div>
         <figcaption class="video-card__meta"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4.5 2.5h7l4 4v11h-11z" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/><path d="M11.5 2.7v4h4" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg><span>beans-fall.mov</span></figcaption>
       </figure>
@@ -719,6 +722,7 @@
         <div class="video-card__frame">
           <video id="latteVid" src="images/clips/latte-art.mp4" muted loop autoplay playsinline preload="metadata" aria-label="A heart of latte art poured into espresso"></video>
           <button class="playround" id="frameCta" type="button" aria-controls="latteVid" aria-label="Toggle video playback"><span class="gloss" aria-hidden="true"></span><span class="tri"></span><span class="play-label">play video</span></button>
+          <button class="video-mute" type="button" aria-pressed="false" aria-label="Unmute video"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.4L12 18.6V5.4L7.4 9.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m16 9.6 4.4 4.8M20.4 9.6 16 14.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button>
         </div>
         <figcaption class="video-card__meta"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4.5 2.5h7l4 4v11h-11z" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/><path d="M11.5 2.7v4h4" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg><span>latte-art.mov</span></figcaption>
       </figure>
@@ -1162,6 +1166,6 @@
   </div>
 </div>
 
-<script src="js/cosmos.js" defer></script>
+<script src="js/cosmos.js?v=2026-10-03" defer></script>
 </body>
 </html>
