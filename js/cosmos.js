@@ -534,21 +534,67 @@
     var timers = [];
     var played = false;
 
+    var gen = 0;
+    var cmp = document.createElement('div');
+    cmp.className = 'cmp'; cmp.setAttribute('aria-hidden', 'true');
+    cmp.innerHTML = '<i class="cmp__plus">+</i><div class="cmp__box"><span class="cmp__txt"></span></div><i class="cmp__send">\u2191</i>';
+    chat.appendChild(cmp);
+    var cmpTxt = cmp.querySelector('.cmp__txt');
+    bubbles.forEach(function (b) {
+      if (b.classList.contains('cbub--in') && !b.querySelector('.typing')) {
+        var t = document.createElement('b'); t.className = 'ty'; t.setAttribute('aria-hidden', 'true');
+        t.innerHTML = '<i></i><i></i><i></i>'; b.insertBefore(t, b.firstChild);
+      }
+    });
+    function wait(ms, g) {
+      return new Promise(function (res) { timers.push(setTimeout(function () { res(g === gen); }, ms)); });
+    }
+    function setTxt(s) { cmpTxt.textContent = s; cmp.classList.toggle('has-text', !!s); }
+    function receipt(b) {
+      $$('.rcpt', chat).forEach(function (r) { r.remove(); });
+      var r = document.createElement('small'); r.className = 'rcpt'; r.textContent = 'Delivered'; b.appendChild(r);
+    }
+    async function run(g) {
+      for (var i = 0; i < bubbles.length; i++) {
+        var b = bubbles[i], out = b.classList.contains('cbub--out');
+        var gap = i === 0 ? 400 : (parseInt(b.dataset.delay, 10) || 900);
+        if (!(await wait(gap, g))) return;
+        var sp = b.firstElementChild && b.querySelector('span');
+        var text = (b.querySelector('span') || b).textContent.trim();
+        if (out) {
+          if (!b.querySelector('.cwave')) {
+            cmp.classList.add('is-live');
+            for (var c = 1; c <= text.length; c++) {
+              setTxt(text.slice(0, c));
+              cmpTxt.scrollLeft = cmpTxt.scrollWidth;
+              if (!(await wait(24 + Math.random() * 34, g))) return;
+            }
+            if (!(await wait(280, g))) return;
+          } else if (!(await wait(500, g))) return;
+          setTxt(''); cmp.classList.remove('is-live');
+          b.classList.add('is-shown');
+          if (!(await wait(650, g))) return;
+          receipt(b);
+        } else {
+          if (b.querySelector('.ty')) {
+            b.classList.add('is-typing', 'is-shown');
+            if (!(await wait(Math.min(1700, 650 + text.length * 22), g))) return;
+            b.classList.remove('is-typing'); b.classList.add('is-msg');
+          } else b.classList.add('is-shown');
+        }
+      }
+    }
     function play() {
       if (played) return;
       played = true;
       if (S.motion === 'reduced') { bubbles.forEach(function (b) { b.classList.add('is-shown'); }); return; }
-      var at = 0;
-      bubbles.forEach(function (b, i) {
-        var gap = i === 0 ? 300 : (parseInt(b.dataset.delay, 10) || 900);
-        at += gap;
-        timers.push(setTimeout(function () { b.classList.add('is-shown'); }, at));
-      });
+      run(++gen);
     }
     function rewind() {
-      timers.forEach(clearTimeout); timers.length = 0;
-      played = false;
-      bubbles.forEach(function (b) { b.classList.remove('is-shown'); });
+      gen++; timers.forEach(clearTimeout); timers.length = 0;
+      played = false; setTxt(''); cmp.classList.remove('is-live');
+      $$('.rcpt', chat).forEach(function (r) { r.remove(); });
+      bubbles.forEach(function (b) { b.classList.remove('is-shown', 'is-typing', 'is-msg'); });
     }
 
     if (S.motion === 'reduced' || !('IntersectionObserver' in window)) { play(); return; }
@@ -568,6 +614,13 @@
     io.observe(chat);
     out.observe(chat);
   })();
+
+  /* ─────────── paper notes: tap to flip ─────────── */
+  $$('.coffee-note').forEach(function (n) {
+    function go() { var on = n.classList.toggle('is-flipped'); n.setAttribute('aria-pressed', on ? 'true' : 'false'); }
+    n.addEventListener('click', go);
+    n.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+  });
 
   /* ─────────── toast (tiny feedback) ─────────── */
   function flash(msg) {

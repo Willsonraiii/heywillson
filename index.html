@@ -83,7 +83,7 @@
 </script>
 <link rel="preload" href="fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="preload" href="fonts/geist-mono-var.woff2" as="font" type="font/woff2" crossorigin />
-<link rel="stylesheet" href="css/cosmos.css?v=2026-10-03c" />
+<link rel="stylesheet" href="css/cosmos.min.css?v=2026-10-03g" />
 <script>
   (function(){ try{ if (sessionStorage.getItem('wr-boot')) document.documentElement.classList.add('no-boot'); }catch(e){} })();
 </script>
@@ -410,21 +410,17 @@
       </div>
 
       <div class="hero-coffee-notes" aria-label="Handwritten coffee notes">
-        <article class="coffee-note coffee-note--guji">
-          <span class="coffee-note__eyebrow">today’s pour</span>
+        <article class="coffee-note coffee-note--guji" role="button" tabindex="0" aria-pressed="false" aria-label="Today's pour - tap to flip the note"><div class="cn-in"><div class="cn-face cn-front"><span class="coffee-note__eyebrow">today’s pour</span>
           <strong>guji<br />honey</strong>
           <span class="coffee-note__detail">v60 · 1:16</span>
-          <svg viewBox="0 0 36 20" aria-hidden="true"><path d="M4 14c5-10 10-10 14-4s7 6 14-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M28 5l4 1-1 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </article>
-        <article class="coffee-note coffee-note--flatwhite">
-          <span class="coffee-note__eyebrow">house favorite</span>
+          <svg viewBox="0 0 36 20" aria-hidden="true"><path d="M4 14c5-10 10-10 14-4s7 6 14-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M28 5l4 1-1 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="cn-hint" aria-hidden="true">tap &#8635;</span></div><div class="cn-face cn-back"><span class="coffee-note__eyebrow">tastes like</span><p>peach tea, wild honey &amp; a little jasmine. sip it slow.</p></div></div></article>
+        <article class="coffee-note coffee-note--flatwhite" role="button" tabindex="0" aria-pressed="false" aria-label="House favorite - tap to flip the note"><div class="cn-in"><div class="cn-face cn-front"><span class="coffee-note__eyebrow">house favorite</span>
           <strong>cocoa<br />flat white</strong>
           <span class="coffee-note__detail">silky · 5 oz</span>
-          <svg viewBox="0 0 36 20" aria-hidden="true"><path d="M4 14c5-10 10-10 14-4s7 6 14-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M28 5l4 1-1 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </article>
+          <svg viewBox="0 0 36 20" aria-hidden="true"><path d="M4 14c5-10 10-10 14-4s7 6 14-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M28 5l4 1-1 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="cn-hint" aria-hidden="true">tap &#8635;</span></div><div class="cn-face cn-back"><span class="coffee-note__eyebrow">barista secret</span><p>60&deg; milk is sweet milk. ask for extra glossy &mdash; cocoa on top, always.</p></div></div></article>
       </div>
 
-      <h1 class="hero__title">experienced barista<br /><em>and creative freelancer</em></h1>
+      <h1 class="hero__title">experienced barista<span class="sr-only"> in Lalitpur, Nepal</span><br /><em>and creative freelancer</em></h1>
       <p class="hero__sub">seven years in specialty coffee in lalitpur, nepal — espresso, latte art, manual brewing, menus, branding, photos and training.</p>
 
       <div class="hero__cta">
@@ -434,7 +430,7 @@
       </div>
       <figure class="hero-video" id="heroVideo">
         <div class="hero-video__frame">
-          <video id="reelVid" src="images/clips/v60-pour.mp4" muted autoplay playsinline preload="auto" aria-label="Pouring a V60 behind the bar"></video>
+          <video id="reelVid" src="images/clips/v60-pour.mp4" poster="images/posters/v60-pour.webp" muted autoplay playsinline preload="auto" aria-label="Pouring a V60 behind the bar"></video>
           <button class="playround" id="reelCta" type="button" aria-controls="reelVid" aria-label="Toggle video playback"><span class="gloss" aria-hidden="true"></span><span class="tri"></span><span class="play-label">play video</span></button>
           <button class="video-mute" id="reelMute" type="button" aria-pressed="false" aria-label="Unmute video"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.4L12 18.6V5.4L7.4 9.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M15.5 9.5a4 4 0 0 1 0 5M18 7.4a7 7 0 0 1 0 9.2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button>
         </div>
@@ -548,7 +544,7 @@
               <li><b>7+</b><span>years behind the bar</span></li>
               <li><b>10k+</b><span>cups crafted</span></li>
               <li><b>50+</b><span>menus &amp; designs</span></li>
-              <li><b>3</b><span>venues, one valley</span></li>
+              <li><b>4</b><span>venues, one valley</span></li>
             </ul>
             </div>
             <div class="note" data-note="coffee">
@@ -604,7 +600,7 @@
         <article class="win reveal" id="winCurrently" data-title="Currently">
           <div class="win__bar"><span class="tl tl--r"></span><span class="tl tl--y"></span><span class="tl tl--g"></span><span class="win__title">Currently</span></div>
           <div class="win__body nowlist">
-            <div><span>working at</span><b>unknown · undisclosed venue</b></div>
+            <div><span>working at</span><b>private venue · lalitpur</b></div>
             <div><span>before</span><b>feels café · '24–'25</b></div>
             <div><span>based in</span><b>lalitpur, nepal</b></div>
             <div><span>brewing</span><b>v60, ethiopia, 1:16</b></div>
@@ -621,11 +617,11 @@
 
   <!-- POSTER -->
   <section class="poster" id="poster">
-    <video class="poster__vid" id="posterVideo" src="images/clips/latte-art.mp4" muted loop autoplay playsinline preload="auto" aria-hidden="true" tabindex="-1"></video>
+    <video class="poster__vid" id="posterVideo" src="images/clips/latte-art.mp4" poster="images/posters/latte-art.webp" muted loop autoplay playsinline preload="metadata" aria-hidden="true" tabindex="-1"></video>
     <span class="poster__shade" aria-hidden="true"></span>
     <div class="poster__copy">
       <h2>a 25-second extraction, a golden crema, and a story in every sip.</h2>
-      <p>three venues, one valley — jhamel beats, chaasuwa, feels café.</p>
+      <p>four venues, one valley — jhamel beats, chaasuwa, feels café, and a private venue today.</p>
       <div class="stage__chat" aria-label="Messages thread between a client and willson">
         <div class="cbub cbub--in" data-delay="0"><span>winter menu prints friday. are the new drinks real?</span><i class="cgl" aria-hidden="true"></i></div>
         <div class="cbub cbub--out" data-delay="900"><span>dialled in — v60 ethiopia 1:16, cocoa-plum flat white, 25-second espresso</span><i class="cgl" aria-hidden="true"></i></div>
@@ -707,19 +703,19 @@
     <div class="video-work__grid">
       <figure class="video-card reveal" id="videoBeans">
         <div class="video-card__frame">
-          <video id="beansVid" src="images/clips/beans-fall.mp4" muted autoplay playsinline preload="auto" aria-label="Coffee beans tumbling into the grinder"></video>
+          <video id="beansVid" src="images/clips/beans-fall.mp4" poster="images/posters/beans-fall.webp" muted autoplay playsinline preload="metadata" aria-label="Coffee beans tumbling into the grinder"></video>
           <button class="playround" id="beansCta" type="button" aria-controls="beansVid" aria-label="Toggle video playback"><span class="gloss" aria-hidden="true"></span><span class="tri"></span><span class="play-label">play video</span></button>
           <button class="video-mute" type="button" aria-pressed="false" aria-label="Unmute video"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.4L12 18.6V5.4L7.4 9.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m16 9.6 4.4 4.8M20.4 9.6 16 14.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button>
         </div>
-        <figcaption class="video-card__meta"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4.5 2.5h7l4 4v11h-11z" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/><path d="M11.5 2.7v4h4" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg><span>beans-fall.mov</span></figcaption>
+        <figcaption class="video-card__meta"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4.5 2.5h7l4 4v11h-11z" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/><path d="M11.5 2.7v4h4" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg><span>fresh beans, straight into the grinder</span></figcaption>
       </figure>
       <figure class="video-card reveal" id="videoLatte">
         <div class="video-card__frame">
-          <video id="latteVid" src="images/clips/latte-art.mp4" muted autoplay playsinline preload="auto" aria-label="A heart of latte art poured into espresso"></video>
+          <video id="latteVid" src="images/clips/latte-art.mp4" poster="images/posters/latte-art.webp" muted autoplay playsinline preload="metadata" aria-label="A heart of latte art poured into espresso"></video>
           <button class="playround" id="frameCta" type="button" aria-controls="latteVid" aria-label="Toggle video playback"><span class="gloss" aria-hidden="true"></span><span class="tri"></span><span class="play-label">play video</span></button>
           <button class="video-mute" type="button" aria-pressed="false" aria-label="Unmute video"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.4L12 18.6V5.4L7.4 9.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m16 9.6 4.4 4.8M20.4 9.6 16 14.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button>
         </div>
-        <figcaption class="video-card__meta"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4.5 2.5h7l4 4v11h-11z" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/><path d="M11.5 2.7v4h4" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg><span>latte-art.mov</span></figcaption>
+        <figcaption class="video-card__meta"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4.5 2.5h7l4 4v11h-11z" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/><path d="M11.5 2.7v4h4" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg><span>one pour, one heart &mdash; no second take</span></figcaption>
       </figure>
     </div>
   </section>
@@ -739,7 +735,7 @@
       <div class="win__body finder">
         <div class="finder__side">
           <span class="finder__lbl">Favourites</span>
-          <button class="finder__item is-active" data-job="0"><i class="fdot fdot--a"></i>Unknown</button>
+          <button class="finder__item is-active" data-job="0"><i class="fdot fdot--a"></i>Private venue</button>
           <button class="finder__item" data-job="1"><i class="fdot fdot--g"></i>Feels Café</button>
           <button class="finder__item" data-job="2"><i class="fdot fdot--b"></i>Chaasuwa</button>
           <button class="finder__item" data-job="3"><i class="fdot fdot--p"></i>Jhamel Beats</button>
@@ -757,7 +753,7 @@
           <div class="rows">
             <button class="frow is-sel" data-job="0">
               <span class="frow__n"><img class="ficimg" src="images/thumb-cup.webp" alt="">barista</span>
-              <span class="frow__v">Unknown · undisclosed</span>
+              <span class="frow__v">Private venue · Lalitpur</span>
               <span class="frow__d">2025 — Now</span>
               <span class="frow__m">100%</span>
             </button>
@@ -1045,7 +1041,7 @@
         </a>
       </nav>
       </div>
-      <p class="foot__fine">© <span id="yr">2026</span> heywillson by Willson Rai · Lalitpur, Nepal · crafting since 2017</p>
+      <p class="foot__fine">© <span id="yr">2026</span> heywillson by Willson Rai · Lalitpur, Nepal · crafting since 2018</p>
     </div>
   </footer>
 </main>
@@ -1150,7 +1146,7 @@
         <div><dt>role</dt><dd>Barista &amp; Creative Freelancer</dd></div>
         <div><dt>venue</dt><dd>undisclosed</dd></div>
         <div><dt>location</dt><dd>Lalitpur, Kathmandu Valley, Nepal</dd></div>
-        <div><dt>experience</dt><dd>7+ years · since 2017</dd></div>
+        <div><dt>experience</dt><dd>7+ years · since 2018</dd></div>
         <div><dt>status</dt><dd>open to consulting, training &amp; design</dd></div>
       </dl>
       <div class="dlg__cta">
@@ -1161,6 +1157,6 @@
   </div>
 </div>
 
-<script src="js/cosmos.js?v=2026-10-03c" defer></script>
+<script src="js/cosmos.min.js?v=2026-10-03e" defer></script>
 </body>
 </html>
