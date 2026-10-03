@@ -13,7 +13,8 @@
   var EMAIL = 'resume@willsonrai.com.np';
   var PHONE = '+9779765829096';
   function noop() {}
-  var resumeClips = noop; /* the video module owns clip lifecycle; settings only ask */
+  var resumeClips = noop;   /* the video module owns clip lifecycle; settings only ask */
+  var syncClipState = noop; /* called after the shared volume changes, to re-silence previews */
 
   /* ─────────── prefs ─────────── */
   var S = { stars: 'on', motion: reduce ? 'reduced' : 'full', dock: 'on', glass: 8, accent: 'ice', density: 150, notifs: 'on', bright: 100, vol: 0, lastVol: 40 };
@@ -84,6 +85,7 @@
   function applyVol() {
     var v = S.vol / 100;
     $$('video').forEach(function (el) { el.volume = v; el.muted = S.vol === 0; });
+    syncClipState();
     set('#ccClipAudioState', S.vol === 0 ? 'muted by default' : 'site sound · ' + S.vol + '%');
     paintMute(S.vol > 0);
     set('#ccVol', S.vol + '%');
@@ -144,148 +146,362 @@
     } else batteryUnavailable();
   })();
 
-  /* ─────────── Heyclicky-style glass video controls ─────────── */
+  /* ─────────── video: half-second live preview + iOS 26 player ───────────
+     Resting state: each clip loops a half-second of its liveliest moment behind
+     a "play video" pill — muted, so the shot breathes instead of sitting frozen.
+     Tapping the pill hands that clip to the iOS 26 player: glass transport,
+     ±10s, and a draggable timeline. Every clip is controlled independently.
+     The poster clip (the one under the conversation) keeps its plain behaviour. */
   (function () {
-    var ICONS = {
-      play: '<svg viewBox="0 0 24 24" width="24" height="24"><path d="M8.5 5.6 18 12l-9.5 6.4z" fill="currentColor"/></svg>',
-      pause: '<svg viewBox="0 0 24 24" width="24" height="24"><path d="M8.6 5.8v12.4M15.4 5.8v12.4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>',
-      sound: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.4L12 18.6V5.4L7.4 9.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M15.5 9.5a4 4 0 0 1 0 5M18 7.4a7 7 0 0 1 0 9.2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
-      mute: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.4L12 18.6V5.4L7.4 9.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m16 9.6 4.4 4.8M20.4 9.6 16 14.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>'
+    /* window starts measured frame-by-frame from each clip, not guessed:
+       v60-pour 5.83s → peak at 1.0s · beans-fall 5.84s → 5.1s · latte-art 5.83s → 1.1s */
+    var PREVIEW = { reelVid: 1.0, beansVid: 5.1, latteVid: 1.1 };
+    var SPAN = 0.5;
+    /* a seek needs ~3 frames to land, during which the clip keeps rolling.
+       fire the rewind slightly early so the visible loop is a true half-second. */
+    var SEEK_LEAD = 0.12;
+    var TARGETS = ['reelVid', 'beansVid', 'latteVid'];
+
+    var SVG = {
+      play: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.2 5.4 18.4 12 8.2 18.6z" fill="currentColor"/></svg>',
+      pause: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.6 5.8v12.4M15.4 5.8v12.4" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>',
+      close: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 6.6 17.4 17.4M17.4 6.6 6.6 17.4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>',
+      sound: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.4L12 18.6V5.4L7.4 9.5Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M15.5 9.5a4 4 0 0 1 0 5M18 7.4a7 7 0 0 1 0 9.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+      mute: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.4L12 18.6V5.4L7.4 9.5Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m16 9.6 4.4 4.8M20.4 9.6 16 14.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+      r10: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.4 12a7 7 0 1 0 2.1-5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><path d="M3.4 3.9v4.3h4.3" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+      f10: '<svg viewBox="0 0 24 24" aria-hidden="true"><g transform="translate(24 0) scale(-1 1)"><path d="M5.4 12a7 7 0 1 0 2.1-5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><path d="M3.4 3.9v4.3h4.3" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></g></svg>'
     };
-    var wired = [], active = null;
-    function soundOn() { return S.vol > 0; }
-    function paint() {
-      wired.forEach(function (w) {
-        var playing = !w.vid.paused && !w.vid.ended;
-        var t = $('.tri', w.btn), label = $('.play-label', w.btn);
-        if (t) t.innerHTML = playing ? ICONS.pause : ICONS.play;
-        if (label) label.textContent = playing ? 'pause video' : 'play video';
-        w.btn.classList.toggle('is-playing', playing);
-        w.btn.setAttribute('aria-label', playing ? 'Pause video' : 'Play video');
-        w.btn.setAttribute('aria-pressed', String(playing));
-        if (w.shell) w.shell.classList.toggle('is-paused', !playing);
-        if (w.mute && w.mute.dataset.on !== String(soundOn())) {
-          w.mute.dataset.on = String(soundOn());
-          w.mute.innerHTML = soundOn() ? ICONS.sound : ICONS.mute;
-        }
-      });
-      paintMute(soundOn());
+
+    var entries = [];
+    function fmt(t) {
+      if (!isFinite(t) || t < 0) t = 0;
+      var m = Math.floor(t / 60), s = Math.floor(t % 60);
+      return m + ':' + (s < 10 ? '0' : '') + s;
     }
-    function playingNow() {
-      for (var i = 0; i < wired.length; i++) if (!wired[i].vid.paused && !wired[i].vid.ended) return wired[i];
-      return null;
+
+    /* ---------- build the player surface inside a clip's frame ---------- */
+    function build(e) {
+      var p = document.createElement('div');
+      p.className = 'plyr';
+      p.setAttribute('role', 'group');
+      p.setAttribute('aria-label', 'Video player');
+      p.innerHTML =
+        '<div class="plyr__row plyr__row--top">' +
+          '<button class="plyr__btn plyr__x" type="button" aria-label="Close player">' + SVG.close + '</button>' +
+          '<div class="plyr__vol">' +
+            '<div class="plyr__volrange" role="slider" tabindex="0" aria-label="Volume" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">' +
+              '<i class="plyr__vfill"></i><b class="plyr__knob"></b>' +
+            '</div>' +
+            '<button class="plyr__spk" type="button" aria-label="Mute video">' + SVG.sound + '</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="plyr__row plyr__row--mid">' +
+          '<button class="plyr__btn plyr__skip" type="button" data-skip="-10" aria-label="Back 10 seconds">' + SVG.r10 + '<b>10</b></button>' +
+          '<button class="plyr__btn plyr__pp" type="button" aria-label="Pause video">' + SVG.pause + '</button>' +
+          '<button class="plyr__btn plyr__skip" type="button" data-skip="10" aria-label="Forward 10 seconds">' + SVG.f10 + '<b>10</b></button>' +
+        '</div>' +
+        '<div class="plyr__row plyr__row--low">' +
+          '<span class="plyr__t plyr__t--el">0:00</span>' +
+          '<div class="plyr__scrub">' +
+            '<div class="plyr__track" role="slider" tabindex="0" aria-label="Seek" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">' +
+              '<i class="plyr__fill"></i><b class="plyr__knob"></b>' +
+            '</div>' +
+          '</div>' +
+          '<span class="plyr__t plyr__t--rem">-0:00</span>' +
+        '</div>';
+      e.frame.appendChild(p);
+
+      var track = $('.plyr__track', p), volRange = $('.plyr__volrange', p);
+      e.ui = {
+        root: p,
+        x: $('.plyr__x', p),
+        pp: $('.plyr__pp', p),
+        skips: $$('.plyr__skip', p),
+        track: track,
+        fill: $('.plyr__fill', track),
+        knob: $('.plyr__knob', track),
+        el: $('.plyr__t--el', p),
+        rem: $('.plyr__t--rem', p),
+        volRange: volRange,
+        vfill: $('.plyr__vfill', volRange),
+        vknob: $('.plyr__knob', volRange),
+        spk: $('.plyr__spk', p)
+      };
+      wire(e);
     }
-    /* the clip nearest the middle of the screen owns playback — same rule the desk windows use */
-    function focused() {
-      var mid = (window.innerHeight || 0) / 2, best = null, bd = 1e9;
-      wired.forEach(function (w) {
-        if (!w.want) return;
-        var r = w.vid.getBoundingClientRect();
-        if (r.bottom <= 0 || r.top >= (window.innerHeight || 0)) return;
-        var d = Math.abs(r.top + r.height / 2 - mid);
-        if (d < bd) { bd = d; best = w; }
-      });
-      return best;
-    }
-    function play(w) {
-      if (!w || playingNow() === w) return;
-      active = w;
-      var p;
-      try { p = w.vid.play(); }
-      catch (err) { return; }
-      if (p && p.catch) p.catch(noop);
-    }
-    function hold(w) {
-      if (!w) return;
-      active = w;
-      w.want = true;
-      if (w.vid.paused && !w.vid.ended) play(w);
-    }
-    /* one clip plays: whichever the viewer is looking at, or the one they last chose */
-    function reconcile() {
-      if (S.motion === 'reduced') return;
-      var cur = playingNow(), focus = focused();
-      if (cur && focus === cur) return;
-      if (cur && !focus) { try { cur.vid.pause(); } catch (err) {} return; }
-      if (cur && focus !== cur) { try { cur.vid.pause(); } catch (err) {} }
-      play(focus);
-    }
-    function stopOthers(w) {
-      wired.forEach(function (o) {
-        if (o === w) return;
-        o.want = false;
-        if (!o.vid.paused) { try { o.vid.pause(); } catch (err) {} }
-      });
-    }
-    /* Opening a clip with sound is fine after a user gesture — starting sound unprompted is not. */
-    function selectSound() {
-      if (soundOn()) return;
-      setVolume(S.lastVol);
-      flash('Sound on · ' + S.lastVol + '% — mute any time');
-    }
-    function start(w, announce) {
-      stopOthers(w);
-      w.want = true;
-      if (w.vid.paused || w.vid.ended) {
-        var p;
-        try { p = w.vid.play(); }
-        catch (err) { if (announce) flash('This video could not start. Tap to try again.'); return; }
-        if (p && p.catch) p.catch(function () { if (announce) flash('This video could not start. Tap to try again.'); });
+
+    /* ---------- drag surface shared by the timeline and the volume bar ---------- */
+    function draggable(el, onValue) {
+      function value(ev) {
+        var r = el.getBoundingClientRect();
+        var cx = ev.touches && ev.touches[0] ? ev.touches[0].clientX : ev.clientX;
+        return Math.max(0, Math.min(1, (cx - r.left) / (r.width || 1)));
       }
-      active = w;
-    }
-    function toggle(w, announce) {
-      if (!w.vid.paused && !w.vid.ended) { w.want = false; w.vid.pause(); return; }
-      selectSound();
-      start(w, announce);
+      function down(ev) {
+        if (ev.button != null && ev.button !== 0) return;
+        el.dataset.drag = '1';
+        if (el.setPointerCapture && ev.pointerId != null) { try { el.setPointerCapture(ev.pointerId); } catch (err) {} }
+        onValue(value(ev)); ev.preventDefault();
+      }
+      function move(ev) { if (el.dataset.drag === '1') { onValue(value(ev)); ev.preventDefault(); } }
+      function up() { delete el.dataset.drag; }
+      el.addEventListener('pointerdown', down);
+      el.addEventListener('pointermove', move);
+      el.addEventListener('pointerup', up);
+      el.addEventListener('pointercancel', up);
+      return value;
     }
 
-    function wire(btn, vid) {
-      if (!btn || !vid) return;
-      var shell = btn.closest('.hero-video__frame,.video-card__frame,.poster');
-      var w = { btn: btn, vid: vid, shell: shell, want: vid.hasAttribute('autoplay'), mute: shell ? $('.video-mute', shell) : null };
-      wired.push(w);
-      btn.addEventListener('click', function (e) {
-        e.preventDefault(); e.stopPropagation();
-        toggle(w, true);
+    function wire(e) {
+      var ui = e.ui, v = e.vid;
+
+      ui.x.addEventListener('click', function (ev) { ev.stopPropagation(); closePlayer(e); });
+      ui.pp.addEventListener('click', function (ev) { ev.stopPropagation(); toggle(e); });
+      ui.skips.forEach(function (b) {
+        b.addEventListener('click', function (ev) {
+          ev.stopPropagation();
+          var d = parseFloat(b.dataset.skip) || 0;
+          seekTo(e, (v.currentTime || 0) + d);
+        });
       });
-      /* the plate itself is a play/pause surface too */
-      vid.addEventListener('click', function () { toggle(w, true); });
-      if (w.mute) w.mute.addEventListener('click', function (e) {
-        e.preventDefault(); e.stopPropagation();
-        setVolume(soundOn() ? 0 : S.lastVol);
+
+      /* the timeline is the seek surface, exactly like iOS */
+      draggable(ui.track, function (f) {
+        if (!isFinite(v.duration) || !v.duration) return;
+        seekTo(e, f * v.duration);
       });
-      /* the browser autostarts muted clips on its own: only the clip holding playback may run */
-      vid.addEventListener('play', function () {
-        if (!active || active.vid !== vid) { try { vid.pause(); } catch (err) {} }
+      ui.track.addEventListener('keydown', function (ev) {
+        var d = ev.key === 'ArrowRight' ? 5 : ev.key === 'ArrowLeft' ? -5 : 0;
+        if (!d) return;
+        ev.preventDefault(); seekTo(e, (v.currentTime || 0) + d);
       });
-      ['play', 'playing', 'pause', 'ended'].forEach(function (ev) { vid.addEventListener(ev, paint); });
+
+      draggable(ui.volRange, function (f) { setVolume(Math.round(f * 100)); paintVol(); });
+      ui.volRange.addEventListener('keydown', function (ev) {
+        var d = ev.key === 'ArrowRight' ? 5 : ev.key === 'ArrowLeft' ? -5 : 0;
+        if (!d) return;
+        ev.preventDefault(); setVolume(S.vol + d); paintVol();
+      });
+      ui.spk.addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        setVolume(S.vol > 0 ? 0 : S.lastVol);
+        paintVol();
+      });
+
+      /* tapping the picture itself toggles playback, like any real player */
+      ui.root.addEventListener('click', function (ev) {
+        if (ev.target.closest('button, .plyr__track, .plyr__volrange, .plyr__vol')) return;
+        toggle(e);
+      });
+      ['play', 'playing', 'pause', 'ended', 'timeupdate', 'loadedmetadata', 'durationchange'].forEach(function (evt) {
+        v.addEventListener(evt, function () { if (e.open) paint(e); });
+      });
     }
 
-    wire($('#reelCta'), $('#reelVid'));
-    wire($('#beansCta'), $('#beansVid'));
-    wire($('#frameCta'), $('#latteVid'));
-    wire($('#posterCta'), $('#posterVideo'));
-
-    /* clips take turns as they pass the middle of the screen, and pause off-screen */
-    if ('IntersectionObserver' in window) {
-      var io = new IntersectionObserver(function () { reconcile(); }, { threshold: 0 });
-      wired.forEach(function (w) { io.observe(w.vid); });
+    function seekTo(e, t) {
+      var v = e.vid;
+      var dur = isFinite(v.duration) && v.duration ? v.duration : 0;
+      try { v.currentTime = Math.max(0, Math.min(dur ? dur - 0.05 : t, t)); } catch (err) {}
+      paint(e);
     }
-    var rafP = false;
-    window.addEventListener('scroll', function () {
-      if (rafP) return; rafP = true;
-      requestAnimationFrame(function () { rafP = false; reconcile(); });
-    }, { passive: true });
 
-    /* the settings panel asks for one clip back, not the whole floor */
+    /* ---------- preview loop ---------- */
+    /* A clip may not accept a seek the instant we ask — before metadata lands it
+       silently clamps to 0. Worse, asking again while a seek is still in flight
+       cancels it. So: one attempt, guarded, then retry when metadata arrives. */
+    function primeSeek(e, s) {
+      var v = e.vid;
+      if (v.seeking) return;
+      if (v.readyState >= 1) {
+        var t = v.currentTime;
+        if (!isFinite(t) || t < s - 0.2 || t > s + SPAN) { try { v.currentTime = s; } catch (err) {} }
+        return;
+      }
+      if (e.primed) return;
+      e.primed = true;
+      var h = function () {
+        v.removeEventListener('loadedmetadata', h);
+        e.primed = false;
+        try { v.currentTime = s; } catch (err) {}
+      };
+      v.addEventListener('loadedmetadata', h);
+    }
+    function arm(e) {
+      var v = e.vid, s = PREVIEW[e.id];
+      e.looping = false;
+      if (typeof s !== 'number') return;
+      v.muted = true; v.volume = 0; v.loop = false;
+      /* reduced motion: hold a real frame instead of running anything */
+      if (S.motion === 'reduced') { try { v.pause(); } catch (err) {} primeSeek(e, s); return; }
+      if (e.open) return;
+      e.looping = true;
+      primeSeek(e, s);
+      var pr = v.play(); if (pr && pr.catch) pr.catch(noop);
+    }
+    function disarm(e) { e.looping = false; }
+
+    /* ---------- state transitions ---------- */
+    function openPlayer(e) {
+      if (e.open) return;
+      entries.forEach(function (o) { if (o !== e && o.open) closePlayer(o); });
+      e.open = true; disarm(e);
+      e.frame.setAttribute('data-player', 'on');
+      var v = e.vid;
+      /* playback is a user gesture now, so bring sound back rather than staying silent */
+      if (S.vol === 0) { setVolume(S.lastVol); flash('sound on · ' + S.vol + '% — mute any time'); }
+      v.muted = S.vol === 0; v.volume = S.vol / 100;
+      try { v.currentTime = 0; } catch (err) {}
+      var pr = v.play();
+      if (pr && pr.catch) pr.catch(function () { flash('This video could not start. Tap to try again.'); });
+      paint(e); paintVol();
+    }
+    function closePlayer(e) {
+      if (!e.open) return;
+      e.open = false;
+      e.frame.removeAttribute('data-player');
+      var v = e.vid;
+      try { v.pause(); } catch (err) {}
+      arm(e); paint(e);
+    }
+    function toggle(e) {
+      var v = e.vid;
+      if (!v.paused && !v.ended) { v.pause(); paint(e); return; }
+      var pr = v.play();
+      if (pr && pr.catch) pr.catch(function () { flash('This video could not start. Tap to try again.'); });
+      paint(e);
+    }
+
+    function paint(e) {
+      var ui = e.ui, v = e.vid; if (!ui) return;
+      var dur = isFinite(v.duration) && v.duration ? v.duration : 0;
+      var cur = Math.min(v.currentTime || 0, dur || 0);
+      var pct = dur ? (cur / dur) * 100 : 0;
+      ui.fill.style.width = pct + '%';
+      ui.knob.style.left = pct + '%';
+      ui.el.textContent = fmt(cur);
+      ui.rem.textContent = '-' + fmt(Math.max(0, dur - cur));
+      var playing = !v.paused && !v.ended;
+      ui.pp.innerHTML = playing ? SVG.pause : SVG.play;
+      ui.pp.setAttribute('aria-label', playing ? 'Pause video' : 'Play video');
+      ui.track.setAttribute('aria-valuenow', String(Math.round(pct)));
+      ui.track.setAttribute('aria-valuetext', fmt(cur) + ' of ' + fmt(dur));
+    }
+    function paintVol() {
+      entries.forEach(function (e) {
+        if (!e.ui) return;
+        e.ui.vfill.style.width = S.vol + '%';
+        e.ui.vknob.style.left = S.vol + '%';
+        e.ui.volRange.setAttribute('aria-valuenow', String(S.vol));
+        e.ui.volRange.setAttribute('aria-valuetext', S.vol === 0 ? 'muted' : S.vol + ' percent');
+        e.ui.spk.innerHTML = S.vol > 0 ? SVG.sound : SVG.mute;
+        e.ui.spk.setAttribute('aria-label', S.vol > 0 ? 'Mute video' : 'Unmute video');
+      });
+    }
+
+    /* ---------- one loop drives every preview and every open player ---------- */
+    function tick() {
+      for (var i = 0; i < entries.length; i++) {
+        var e = entries[i], v = e.vid;
+        if (e.open) { paint(e); continue; }
+        if (!e.looping) continue;
+        var s = PREVIEW[e.id];
+        if (typeof s !== 'number') continue;
+        /* a seek already running, or a clip that can't seek yet — skip, don't thrash */
+        if (v.seeking || v.readyState < 1) continue;
+        var t = v.currentTime || 0;
+        if (t > s + SPAN - SEEK_LEAD || t < s - 0.2) { try { v.currentTime = s; } catch (err) {} }
+      }
+      window.requestAnimationFrame(tick);
+    }
+    window.requestAnimationFrame(tick);
+
+    /* ---------- mount ---------- */
+    TARGETS.forEach(function (id) {
+      var v = $('#' + id); if (!v) return;
+      var frame = v.closest('.hero-video__frame, .video-card__frame') || v.parentElement;
+      if (!frame) return;
+      frame.classList.add('vframe');
+      var e = { id: id, vid: v, frame: frame, open: false, looping: false, ui: null };
+      entries.push(e);
+      build(e);
+
+      /* the resting pill always invites playback — it never flips to "pause" */
+      var cta = $('.playround', frame);
+      if (cta) {
+        var tri = $('.tri', cta);
+        if (tri) tri.innerHTML = '<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M8.5 5.6 18 12l-9.5 6.4z" fill="currentColor"/></svg>';
+        var lbl = $('.play-label', cta);
+        if (lbl) lbl.textContent = 'play video';
+        cta.setAttribute('aria-label', 'Play video');
+        cta.addEventListener('click', function (ev) { ev.preventDefault(); ev.stopPropagation(); openPlayer(e); });
+      }
+      arm(e);
+    });
+
+    /* ---------- the poster clip is independent: plain play / pause ---------- */
+    (function () {
+      var btn = $('#posterCta'), v = $('#posterVideo');
+      if (!btn || !v) return;
+      function paintPoster() {
+        var playing = !v.paused && !v.ended;
+        var tri = $('.tri', btn), lbl = $('.play-label', btn);
+        if (tri) tri.innerHTML = playing ? SVG.pause : SVG.play;
+        if (lbl) lbl.textContent = playing ? 'pause video' : 'play video';
+        btn.setAttribute('aria-label', playing ? 'Pause video' : 'Play video');
+        btn.setAttribute('aria-pressed', String(playing));
+      }
+      btn.addEventListener('click', function (ev) {
+        ev.preventDefault(); ev.stopPropagation();
+        if (!v.paused && !v.ended) { v.pause(); return; }
+        var pr = v.play();
+        if (pr && pr.catch) pr.catch(function () { flash('This video could not start. Tap to try again.'); });
+        paintPoster();
+      });
+      ['play', 'playing', 'pause', 'ended', 'loadedmetadata'].forEach(function (evt) { v.addEventListener(evt, paintPoster); });
+      paintPoster();
+    })();
+
+    /* ---------- hooks the settings panel already talks to ---------- */
     resumeClips = function () {
-      var w = (active && active.want) ? active : focused();
-      if (w) hold(w); else reconcile();
+      entries.forEach(function (e) { if (!e.open) arm(e); });
+    };
+    /* applyVol() touches every <video>; preview clips must stay silent regardless */
+    syncClipState = function () {
+      entries.forEach(function (e) {
+        if (e.open) { e.vid.muted = S.vol === 0; e.vid.volume = S.vol / 100; }
+        else { e.vid.muted = true; e.vid.volume = 0; }
+      });
+      paintVol();
     };
 
-    paint();
-    applyVol();
+    window.addEventListener('keydown', function (ev) {
+      if (ev.key !== 'Escape') return;
+      for (var i = 0; i < entries.length; i++) if (entries[i].open) { closePlayer(entries[i]); break; }
+    });
+    document.addEventListener('visibilitychange', function () {
+      var hidden = document.hidden;
+      entries.forEach(function (e) {
+        if (hidden) { disarm(e); if (!e.open) { try { e.vid.pause(); } catch (err) {} } }
+        else if (!e.open) arm(e);
+      });
+      var pv = $('#posterVideo');
+      if (pv && !hidden && S.motion !== 'reduced' && pv.paused) { var pr = pv.play(); if (pr && pr.catch) pr.catch(noop); }
+    });
+  })();
+
+  /* ─────────── the conversation plays in as you reach it ─────────── */
+  (function () {
+    var chat = $('.stage__chat');
+    if (!chat) return;
+    var show = function () { chat.classList.add('is-live'); };
+    if (S.motion === 'reduced' || !('IntersectionObserver' in window)) { show(); return; }
+    var io = new IntersectionObserver(function (rows) {
+      for (var i = 0; i < rows.length; i++) {
+        if (!rows[i].isIntersecting) continue;
+        show(); io.disconnect(); return;
+      }
+    }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+    io.observe(chat);
   })();
 
   /* ─────────── toast (tiny feedback) ─────────── */

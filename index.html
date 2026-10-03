@@ -83,7 +83,7 @@
 </script>
 <link rel="preload" href="fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="preload" href="fonts/geist-mono-var.woff2" as="font" type="font/woff2" crossorigin />
-<link rel="stylesheet" href="css/cosmos.css?v=2026-10-03" />
+<link rel="stylesheet" href="css/cosmos.css?v=2026-10-03b" />
 <script>
   (function(){ try{ if (sessionStorage.getItem('wr-boot')) document.documentElement.classList.add('no-boot'); }catch(e){} })();
 </script>
@@ -94,7 +94,7 @@
   gtag('js', new Date());
   gtag('config', 'G-E4HNRVBCG2');
 </script>
-<noscript><style>.reveal{opacity:1 !important;transform:none !important}.boot{display:none}</style></noscript>
+<noscript><style>.reveal{opacity:1 !important;transform:none !important}.stage__chat .cbub{opacity:1 !important;transform:none !important}.boot{display:none}</style></noscript>
 </head>
 
 <body>
@@ -428,17 +428,13 @@
       <p class="hero__sub">seven years in specialty coffee in lalitpur, nepal — espresso, latte art, manual brewing, menus, branding, photos and training.</p>
 
       <div class="hero__cta">
-        <a class="hbtn hbtn--primary" href="#hire"><span class="gloss" aria-hidden="true"></span><span>hire me</span><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M5 12h13m-5-5 5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-        <a class="hbtn hbtn--mac" href="public/willson-rai-cv.pdf" download>
-          <span class="gloss" aria-hidden="true"></span>
-          <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M12 3v11m0 0 4-4m-4 4-4-4M4 19h16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <span>download cv</span>
-        </a>
-        <a class="hbtn" href="https://wa.me/9779765829096" target="_blank" rel="noopener"><span class="gloss" aria-hidden="true"></span><span>message on whatsapp</span></a>
+        <a class="hbtn hbtn--blue" href="#hire"><span class="gloss" aria-hidden="true"></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h12v6.5A4.5 4.5 0 0 1 11.5 19h-3A4.5 4.5 0 0 1 4 14.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M16 9.6h1.7a2.6 2.6 0 1 1 0 5.2H16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M7.2 5.6V3.7M10.6 5.6V3.7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span>hire me</span></a>
+        <a class="hbtn hbtn--grey" href="public/willson-rai-cv.pdf" download><span class="gloss" aria-hidden="true"></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.7v10.1m0 0 3.8-3.8M12 13.8l-3.8-3.8M4.7 18.4h14.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>download cv</span></a>
+        <a class="hbtn hbtn--wa" href="https://wa.me/9779765829096" target="_blank" rel="noopener"><span class="gloss" aria-hidden="true"></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.3a8.5 8.5 0 0 0-7.3 12.8l-1.2 4.5 4.6-1.2A8.5 8.5 0 1 0 12 3.3Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9.3 8.7c-.3 0-.7.1-1 .4-.4.4-.9 1-.9 1.9 0 1 .7 2.1 1.8 3.2 1.1 1.1 2.3 1.8 3.2 1.8.9 0 1.5-.5 1.9-.9.3-.3.4-.7.4-1v-.4c0-.2-.1-.3-.3-.4l-1.3-.7c-.2-.1-.4 0-.5.1l-.5.6c-.1.2-.3.2-.5.1-.5-.2-1-.5-1.4-1-.4-.4-.8-.9-1-1.4-.1-.2 0-.4.1-.5l.6-.5c.1-.1.2-.3.1-.5l-.7-1.3c-.1-.2-.3-.3-.5-.3Z" fill="currentColor"/></svg><span>message on whatsapp</span></a>
       </div>
       <figure class="hero-video" id="heroVideo">
         <div class="hero-video__frame">
-          <video id="reelVid" src="images/clips/v60-pour.mp4" muted loop autoplay playsinline preload="metadata" aria-label="Pouring a V60 behind the bar"></video>
+          <video id="reelVid" src="images/clips/v60-pour.mp4" muted autoplay playsinline preload="auto" aria-label="Pouring a V60 behind the bar"></video>
           <button class="playround" id="reelCta" type="button" aria-controls="reelVid" aria-label="Toggle video playback"><span class="gloss" aria-hidden="true"></span><span class="tri"></span><span class="play-label">play video</span></button>
           <button class="video-mute" id="reelMute" type="button" aria-pressed="false" aria-label="Unmute video"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.4L12 18.6V5.4L7.4 9.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M15.5 9.5a4 4 0 0 1 0 5M18 7.4a7 7 0 0 1 0 9.2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button>
         </div>
@@ -632,15 +628,25 @@
     <div class="poster__copy">
       <h2>a 25-second extraction, a golden crema, and a story in every sip.</h2>
       <p>three venues, one valley — jhamel beats, chaasuwa, feels café.</p>
+    <svg class="bub-defs" width="0" height="0" aria-hidden="true" focusable="false">
+      <defs>
+        <path id="bubPath" d="M25.5,0H114.5A25.5,25.5 0 0 1 140,25.5V27.5C140,40 136.4,44.5 131.577,46.712C129.471,48.577 127.928,51.262 129.136,53.803C129.595,54.741 130.763,56.473 131.785,57.808C132.807,59.142 132.473,61.623 129.846,61.415C128.97,61.352 125.466,59.809 121.378,57.557C116.404,54.818 110.928,52.976 105.25,52.995H25.5A25.5,25.5 0 0 1 0,27.5V25.5A25.5,25.5 0 0 1 25.5,0 Z"/>
+        <linearGradient id="bubFillOut" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d6e6ff"/><stop offset=".42" stop-color="#9ec5ff"/><stop offset="1" stop-color="#d2f1f7"/></linearGradient>
+        <linearGradient id="bubStrokeOut" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#221898"/><stop offset="1" stop-color="#626262"/></linearGradient>
+        <linearGradient id="bubFillIn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe9d6"/><stop offset=".42" stop-color="#ffc999"/><stop offset="1" stop-color="#ffe9d6"/></linearGradient>
+        <linearGradient id="bubStrokeIn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9a5518"/><stop offset="1" stop-color="#626262"/></linearGradient>
+      </defs>
+    </svg>
       <div class="stage__chat" aria-label="Messages thread between a client and willson">
-        <div class="msg msg--ai"><div class="msg__bub">willson, the winter menu prints friday. are the new drinks real yet?</div></div>
-        <div class="msg msg--me"><div class="msg__bub">real and dialled in — v60 ethiopia 1:16, cocoa-plum flat white, 25-second espresso</div></div>
-        <div class="msg msg--ai"><div class="msg__bub">and the cards? the ones with the pour on the back?</div></div>
-        <div class="msg msg--me"><div class="msg__bub">at the printer tonight. you'll have them by service</div></div>
-        <div class="msg msg--ai"><div class="msg__bub msg__bub--voice"><span class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><em>voice note · 0:04 — the grinder, listen</em></div></div>
-        <div class="msg msg--me"><div class="msg__bub">unfair to every other barista in this valley. thank you</div></div>
-        <div class="msg msg--ai"><div class="msg__bub typing" aria-label="client is typing"><i></i><i></i><i></i></div></div>
-      </div>
+        <div class="cbub cbub--in" style="--i:0"><svg class="bubsvg" viewBox="0 0 140 53" preserveAspectRatio="none" aria-hidden="true"><use href="#bubPath" transform="translate(140,0) scale(-1,1)" fill="url(#bubFillIn)" stroke="url(#bubStrokeIn)" stroke-width="1"/></svg><span>winter menu prints friday. are the new drinks real?</span><i class="cgl" aria-hidden="true"></i></div>
+        <div class="cbub cbub--out" style="--i:1"><svg class="bubsvg" viewBox="0 0 140 53" preserveAspectRatio="none" aria-hidden="true"><use href="#bubPath" fill="url(#bubFillOut)" stroke="url(#bubStrokeOut)" stroke-width="1"/></svg><span>dialled in — v60 ethiopia 1:16, cocoa-plum flat white, 25-second espresso</span><i class="cgl" aria-hidden="true"></i></div>
+        <div class="cbub cbub--in" style="--i:2"><svg class="bubsvg" viewBox="0 0 140 53" preserveAspectRatio="none" aria-hidden="true"><use href="#bubPath" transform="translate(140,0) scale(-1,1)" fill="url(#bubFillIn)" stroke="url(#bubStrokeIn)" stroke-width="1"/></svg><span>and the cards? with the pour on the back?</span><i class="cgl" aria-hidden="true"></i></div>
+        <div class="cbub cbub--out" style="--i:3"><svg class="bubsvg" viewBox="0 0 140 53" preserveAspectRatio="none" aria-hidden="true"><use href="#bubPath" fill="url(#bubFillOut)" stroke="url(#bubStrokeOut)" stroke-width="1"/></svg><span>at the printer tonight. you&#39;ll have them by service</span><i class="cgl" aria-hidden="true"></i></div>
+        <div class="cbub cbub--in" style="--i:4"><svg class="bubsvg" viewBox="0 0 140 53" preserveAspectRatio="none" aria-hidden="true"><use href="#bubPath" transform="translate(140,0) scale(-1,1)" fill="url(#bubFillIn)" stroke="url(#bubStrokeIn)" stroke-width="1"/></svg><span>unfair to every other barista in this valley</span><i class="cgl" aria-hidden="true"></i></div>
+        <div class="cbub cbub--out" style="--i:5"><svg class="bubsvg" viewBox="0 0 140 53" preserveAspectRatio="none" aria-hidden="true"><use href="#bubPath" fill="url(#bubFillOut)" stroke="url(#bubStrokeOut)" stroke-width="1"/></svg><span>thank you. grinder sound for the reel, hang on</span><i class="cgl" aria-hidden="true"></i></div>
+        <div class="cbub cbub--out" style="--i:6"><svg class="bubsvg" viewBox="0 0 140 53" preserveAspectRatio="none" aria-hidden="true"><use href="#bubPath" fill="url(#bubFillOut)" stroke="url(#bubStrokeOut)" stroke-width="1"/></svg><span><span class="cwave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="cnote">voice note · 0:04 · the grinder</span></span><i class="cgl" aria-hidden="true"></i></div>
+        <div class="cbub cbub--in cbub--typing" style="--i:7"><svg class="bubsvg" viewBox="0 0 140 53" preserveAspectRatio="none" aria-hidden="true"><use href="#bubPath" transform="translate(140,0) scale(-1,1)" fill="url(#bubFillIn)" stroke="url(#bubStrokeIn)" stroke-width="1"/></svg><span><span class="typing" aria-label="client is typing"><i></i><i></i><i></i></span></span><i class="cgl" aria-hidden="true"></i></div>
+      </div></div>
     </div>
   </section>
 
@@ -712,7 +718,7 @@
     <div class="video-work__grid">
       <figure class="video-card reveal" id="videoBeans">
         <div class="video-card__frame">
-          <video id="beansVid" src="images/clips/beans-fall.mp4" muted loop autoplay playsinline preload="metadata" aria-label="Coffee beans tumbling into the grinder"></video>
+          <video id="beansVid" src="images/clips/beans-fall.mp4" muted autoplay playsinline preload="auto" aria-label="Coffee beans tumbling into the grinder"></video>
           <button class="playround" id="beansCta" type="button" aria-controls="beansVid" aria-label="Toggle video playback"><span class="gloss" aria-hidden="true"></span><span class="tri"></span><span class="play-label">play video</span></button>
           <button class="video-mute" type="button" aria-pressed="false" aria-label="Unmute video"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.4L12 18.6V5.4L7.4 9.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m16 9.6 4.4 4.8M20.4 9.6 16 14.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button>
         </div>
@@ -720,7 +726,7 @@
       </figure>
       <figure class="video-card reveal" id="videoLatte">
         <div class="video-card__frame">
-          <video id="latteVid" src="images/clips/latte-art.mp4" muted loop autoplay playsinline preload="metadata" aria-label="A heart of latte art poured into espresso"></video>
+          <video id="latteVid" src="images/clips/latte-art.mp4" muted autoplay playsinline preload="auto" aria-label="A heart of latte art poured into espresso"></video>
           <button class="playround" id="frameCta" type="button" aria-controls="latteVid" aria-label="Toggle video playback"><span class="gloss" aria-hidden="true"></span><span class="tri"></span><span class="play-label">play video</span></button>
           <button class="video-mute" type="button" aria-pressed="false" aria-label="Unmute video"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.4L12 18.6V5.4L7.4 9.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m16 9.6 4.4 4.8M20.4 9.6 16 14.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button>
         </div>
@@ -1166,6 +1172,6 @@
   </div>
 </div>
 
-<script src="js/cosmos.js?v=2026-10-03" defer></script>
+<script src="js/cosmos.js?v=2026-10-03b" defer></script>
 </body>
 </html>

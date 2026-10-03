@@ -1511,3 +1511,149 @@ body[data-motion="reduced"] .pitcher-mark{ animation:none; }
   .mobile-widget-rail .sticky-pills{ gap:4px }
   .mobile-widget-rail .sticky-pills button{ padding:2px 6px; font-size:8px }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   AQUA CTA · HEYCLICKY BALLOONS · iOS 26 VIDEO PLAYER
+   appended last so these win the cascade on every breakpoint
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. hero CTA — aqua pills, heyclicky geometry ──────────────────────────
+   40px tall · radius 999 · Inter 500 18px · -.54px · gloss bar inset 16px
+   note: the old @media (max-width:390px) block flattened these to glass;
+   .hero__cta scoping outranks it so phones keep the aqua look too. */
+.hero__cta .hbtn,
+.hbtn.hbtn--blue,
+.hbtn.hbtn--grey,
+.hbtn.hbtn--wa{
+  position:relative; display:inline-flex; align-items:center; justify-content:center; gap:10px;
+  height:40px; min-height:0; padding:0 20px 1px 16px; border-radius:999px; overflow:hidden;
+  font-size:18px; font-weight:500; letter-spacing:-.54px; line-height:1.5;
+  color:#000; text-decoration:none; cursor:pointer; white-space:nowrap;
+  text-shadow:0 2px 2px rgba(255,255,255,.8);
+  box-shadow:0 10px 24px rgba(0,0,0,.28); border:1px solid #626262;
+  background:linear-gradient(#fbfbfb 0%, #ededed 42%, #e4e4e4 100%);
+  transition:transform .12s var(--ease), filter .16s var(--ease);
+}
+.hero__cta .hbtn--blue{ background:linear-gradient(#edf4ff 0%, #d6e7ff 18%, #a2c7ff 50%, #99cbf8 80%, #a2d2f7 100%); border-color:#221898 }
+.hero__cta .hbtn--wa{ background:linear-gradient(#eafdf2 0%, #d0f7e0 18%, #8ae8b1 50%, #78e0a6 80%, #a6f2c6 100%); border-color:#0b7a4b }
+.hero__cta .hbtn .gloss{
+  position:absolute; z-index:1; pointer-events:none; border-radius:999px;
+  top:3px; left:16px; right:16px; height:12px;
+  background:linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,0));
+}
+.hero__cta .hbtn::before,
+.hero__cta .hbtn::after{ content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none }
+.hero__cta .hbtn::before{ mix-blend-mode:screen; box-shadow:inset 0 -15px 2px -12px rgba(255,255,255,.34) }
+.hero__cta .hbtn::after{ mix-blend-mode:color-burn; box-shadow:inset 0 -8px 0 4px #b8b8b8; opacity:.5 }
+.hero__cta .hbtn svg,
+.hero__cta .hbtn span:not(.gloss){ position:relative; z-index:2 }
+.hero__cta .hbtn svg{ width:17px; height:17px; flex:0 0 auto; display:block }
+.hero__cta .hbtn:hover{ transform:scale(1.03) }
+.hero__cta .hbtn:active{ transform:scale(.97) }
+
+/* ── 2. conversation balloons — SVG bodies with real iMessage tails ─────── */
+.stage__chat{ display:flex; flex-direction:column; gap:24px; align-items:flex-start;
+  width:min(560px,88vw); margin:34px auto 0; text-align:left }
+body[data-motion="reduced"] .stage__chat{ margin-top:34px }
+.cbub{
+  position:relative; isolation:isolate;
+  width:fit-content; max-width:min(296px,92%);
+  padding:12px 20px; font-size:20px; line-height:1.35; letter-spacing:-.4px;
+  color:#000; text-shadow:0 2px 2px rgba(255,255,255,.8);
+  overflow:visible;
+}
+.cbub--out{ align-self:flex-end }
+.cbub .bubsvg{ position:absolute; z-index:0; top:0; left:0; width:100%; height:100%;
+  overflow:visible; pointer-events:none; filter:drop-shadow(0 8px 10px rgba(0,0,0,.11)) }
+.cbub > span, .cbub > .cwave{ position:relative; z-index:2 }
+.cbub .cgl{ position:absolute; z-index:1; pointer-events:none; border-radius:999px;
+  height:12px; top:3px; left:16px; right:16px;
+  background:linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,0)) }
+.cbub .cwave{ display:flex; align-items:center; gap:2.5px; height:22px; margin-bottom:4px }
+.cbub .cwave i{ width:3px; border-radius:2px; background:#5c3a12; opacity:.8 }
+.cbub .cwave i:nth-child(1){height:6px}.cbub .cwave i:nth-child(2){height:14px}.cbub .cwave i:nth-child(3){height:9px}
+.cbub .cwave i:nth-child(4){height:7px}.cbub .cwave i:nth-child(5){height:7px}.cbub .cwave i:nth-child(6){height:10px}
+.cbub .cwave i:nth-child(7){height:6px}.cbub .cwave i:nth-child(8){height:15px}.cbub .cwave i:nth-child(9){height:7px}
+.cbub .cwave i:nth-child(10){height:16px}.cbub .cwave i:nth-child(11){height:10px}.cbub .cwave i:nth-child(12){height:5px}
+.cbub .cnote{ display:block; font-family:var(--mono); font-size:11px; opacity:.72; margin-top:5px; letter-spacing:0 }
+/* the thread stays silent until the visitor scrolls it into view */
+.stage__chat .cbub{ opacity:0; transform:translateY(10px) scale(.97);
+  transition:opacity .42s var(--ease), transform .42s var(--ease) }
+.stage__chat.is-live .cbub{ opacity:1; transform:none; transition-delay:calc(var(--i,0) * 260ms) }
+body[data-motion="reduced"] .stage__chat .cbub{ opacity:1; transform:none; transition:none }
+.cbub .typing{ display:inline-flex; gap:4px; align-items:center; padding:2px 0 }
+.cbub .typing i{ display:inline-block; width:6px; height:6px; border-radius:50%; background:#8a5a1c; animation:tp 1.1s infinite }
+.cbub .typing i:nth-child(2){ animation-delay:.18s } .cbub .typing i:nth-child(3){ animation-delay:.36s }
+/* short bubbles would otherwise squash the balloon into a square */
+.cbub{ min-width:74px; min-height:40px; justify-content:center; align-items:flex-start; display:flex; flex-direction:column }
+.cbub--typing{ min-width:74px; min-height:44px }
+.cbub--typing > span{ display:flex; align-items:center; min-height:20px }
+.cbub .cbub, .cbub > span{ min-width:0 }
+@media (max-width:760px){
+  .stage__chat{ gap:18px; width:94vw }
+  .cbub{ font-size:16px; padding:11px 17px; max-width:min(90%,300px); min-width:62px; min-height:36px }
+}
+@media (max-width:390px){
+  .cbub{ font-size:15px; padding:10px 15px }
+}
+
+/* ── 3. iOS 26 video player ─────────────────────────────────────────────── */
+.vframe{ position:relative }
+.plyr{ position:absolute; inset:0; z-index:7; opacity:0; pointer-events:none;
+  transition:opacity .2s var(--ease);
+  display:flex; flex-direction:column; justify-content:space-between;
+  padding:clamp(9px,1.5%,16px); border-radius:inherit;
+  font-family:var(--ui); -webkit-user-select:none; user-select:none }
+.vframe[data-player="on"] .plyr{ opacity:1; pointer-events:auto }
+/* a soft scrim keeps the glass controls legible over bright footage */
+.plyr::before{ content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+  background:linear-gradient(180deg, rgba(0,0,0,.36) 0%, rgba(0,0,0,.04) 26%, rgba(0,0,0,.04) 62%, rgba(0,0,0,.42) 100%) }
+.plyr > *{ position:relative; z-index:1 }
+.plyr__row{ display:flex; align-items:center; gap:10px }
+.plyr__row--top{ justify-content:space-between }
+.plyr__row--mid{ justify-content:center; gap:clamp(12px,3%,26px) }
+.plyr__row--low{ gap:clamp(8px,1.6%,14px) }
+
+.plyr__btn{ display:grid; place-items:center; border-radius:50%; cursor:pointer; flex:0 0 auto;
+  color:#fff; background:rgba(255,255,255,.17); border:1px solid rgba(255,255,255,.32);
+  -webkit-backdrop-filter:blur(16px) saturate(180%); backdrop-filter:blur(16px) saturate(180%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.34), 0 6px 18px rgba(0,0,0,.28);
+  transition:background .16s var(--ease), transform .14s var(--ease) }
+.plyr__btn:hover{ background:rgba(255,255,255,.28) }
+.plyr__btn:active{ transform:scale(.92) }
+.plyr__btn svg{ display:block }
+.plyr__x{ width:clamp(28px,3.4vw,34px); height:clamp(28px,3.4vw,34px) }
+.plyr__x svg{ width:52%; height:52% }
+.plyr__pp{ width:clamp(46px,5.6vw,58px); height:clamp(46px,5.6vw,58px); background:rgba(255,255,255,.24) }
+.plyr__pp svg{ width:44%; height:44% }
+.plyr__skip{ position:relative; width:clamp(38px,4.6vw,48px); height:clamp(38px,4.6vw,48px) }
+.plyr__skip svg{ width:64%; height:64% }
+.plyr__skip b{ position:absolute; font-size:clamp(7.5px,.86vw,9px); font-weight:650; letter-spacing:-.02em; margin-top:1px }
+
+.plyr__vol{ display:flex; align-items:center; gap:8px; padding:5px 10px; border-radius:999px;
+  background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.26);
+  -webkit-backdrop-filter:blur(16px) saturate(180%); backdrop-filter:blur(16px) saturate(180%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.3) }
+.plyr__track{ position:relative; height:clamp(4px,.5vw,5px); flex:1 1 auto; border-radius:999px; cursor:pointer;
+  background:rgba(255,255,255,.3); touch-action:none }
+.plyr__fill{ position:absolute; inset:0 auto 0 0; width:0%; border-radius:999px; background:#fff }
+.plyr__knob{ position:absolute; top:50%; left:0%; width:clamp(11px,1.3vw,14px); height:clamp(11px,1.3vw,14px);
+  border-radius:50%; background:#fff; transform:translate(-50%,-50%); box-shadow:0 1px 4px rgba(0,0,0,.4); pointer-events:none }
+.plyr__volrange{ position:relative; width:clamp(52px,7vw,86px); height:4px; border-radius:999px; cursor:pointer;
+  background:rgba(255,255,255,.32); touch-action:none }
+.plyr__vfill{ position:absolute; inset:0 auto 0 0; width:0%; border-radius:999px; background:#fff }
+.plyr__spk{ display:grid; place-items:center; width:22px; height:22px; color:#fff; background:none; border:0; cursor:pointer; padding:0 }
+.plyr__spk svg{ width:100%; height:100% }
+.plyr__t{ color:#fff; font-family:var(--mono); font-size:clamp(9.5px,1.05vw,11.5px); letter-spacing:-.01em;
+  min-width:clamp(32px,4vw,42px); text-shadow:0 1px 3px rgba(0,0,0,.6) }
+.plyr__t--el{ text-align:left }
+.plyr__t--rem{ text-align:right }
+.plyr__scrub{ display:flex; align-items:center; gap:clamp(8px,1.4vw,13px); flex:1 1 auto }
+/* while the player owns the clip, the resting controls get out of the way */
+.vframe[data-player="on"] .playround,
+.vframe[data-player="on"] .video-mute{ opacity:0; pointer-events:none }
+.vframe[data-player="on"] video{ cursor:default }
+@media (max-width:760px){
+  .plyr__row--mid{ gap:14px }
+  .plyr__vol{ padding:4px 8px; gap:6px }
+}
