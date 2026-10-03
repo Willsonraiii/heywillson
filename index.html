@@ -83,7 +83,7 @@
 </script>
 <link rel="preload" href="fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="preload" href="fonts/geist-mono-var.woff2" as="font" type="font/woff2" crossorigin />
-<link rel="stylesheet" href="css/cosmos.css?v=2026-10-03b" />
+<link rel="stylesheet" href="css/cosmos.css?v=2026-10-03c" />
 <script>
   (function(){ try{ if (sessionStorage.getItem('wr-boot')) document.documentElement.classList.add('no-boot'); }catch(e){} })();
 </script>
@@ -621,31 +621,20 @@
 
   <!-- POSTER -->
   <section class="poster" id="poster">
-    <video class="poster__vid" id="posterVideo" src="images/clips/latte-art.mp4" muted loop autoplay playsinline preload="metadata" aria-hidden="true" tabindex="-1"></video>
-    <button class="playround playround--poster" id="posterCta" type="button" aria-controls="posterVideo" aria-label="Toggle video playback"><span class="gloss" aria-hidden="true"></span><span class="tri"></span><span class="play-label">play video</span></button>
-    <button class="video-mute" type="button" aria-pressed="false" aria-label="Unmute video"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.4L12 18.6V5.4L7.4 9.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m16 9.6 4.4 4.8M20.4 9.6 16 14.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button>
+    <video class="poster__vid" id="posterVideo" src="images/clips/latte-art.mp4" muted loop autoplay playsinline preload="auto" aria-hidden="true" tabindex="-1"></video>
     <span class="poster__shade" aria-hidden="true"></span>
     <div class="poster__copy">
       <h2>a 25-second extraction, a golden crema, and a story in every sip.</h2>
       <p>three venues, one valley — jhamel beats, chaasuwa, feels café.</p>
-    <svg class="bub-defs" width="0" height="0" aria-hidden="true" focusable="false">
-      <defs>
-        <path id="bubPath" d="M25.5,0H114.5A25.5,25.5 0 0 1 140,25.5V27.5C140,40 136.4,44.5 131.577,46.712C129.471,48.577 127.928,51.262 129.136,53.803C129.595,54.741 130.763,56.473 131.785,57.808C132.807,59.142 132.473,61.623 129.846,61.415C128.97,61.352 125.466,59.809 121.378,57.557C116.404,54.818 110.928,52.976 105.25,52.995H25.5A25.5,25.5 0 0 1 0,27.5V25.5A25.5,25.5 0 0 1 25.5,0 Z"/>
-        <linearGradient id="bubFillOut" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d6e6ff"/><stop offset=".42" stop-color="#9ec5ff"/><stop offset="1" stop-color="#d2f1f7"/></linearGradient>
-        <linearGradient id="bubStrokeOut" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#221898"/><stop offset="1" stop-color="#626262"/></linearGradient>
-        <linearGradient id="bubFillIn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe9d6"/><stop offset=".42" stop-color="#ffc999"/><stop offset="1" stop-color="#ffe9d6"/></linearGradient>
-        <linearGradient id="bubStrokeIn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9a5518"/><stop offset="1" stop-color="#626262"/></linearGradient>
-      </defs>
-    </svg>
       <div class="stage__chat" aria-label="Messages thread between a client and willson">
-        <div class="cbub cbub--in" style="--i:0"><svg class="bubsvg" viewBox="0 0 140 53" preserveAspectRatio="none" aria-hidden="true"><use href="#bubPath" transform="translate(140,0) scale(-1,1)" fill="url(#bubFillIn)" stroke="url(#bubStrokeIn)" stroke-width="1"/></svg><span>winter menu prints friday. are the new drinks real?</span><i class="cgl" aria-hidden="true"></i></div>
-        <div class="cbub cbub--out" style="--i:1"><svg class="bubsvg" viewBox="0 0 140 53" preserveAspectRatio="none" aria-hidden="true"><use href="#bubPath" fill="url(#bubFillOut)" stroke="url(#bubStrokeOut)" stroke-width="1"/></svg><span>dialled in — v60 ethiopia 1:16, cocoa-plum flat white, 25-second espresso</span><i class="cgl" aria-hidden="true"></i></div>
-        <div class="cbub cbub--in" style="--i:2"><svg class="bubsvg" viewBox="0 0 140 53" preserveAspectRatio="none" aria-hidden="true"><use href="#bubPath" transform="translate(140,0) scale(-1,1)" fill="url(#bubFillIn)" stroke="url(#bubStrokeIn)" stroke-width="1"/></svg><span>and the cards? with the pour on the back?</span><i class="cgl" aria-hidden="true"></i></div>
-        <div class="cbub cbub--out" style="--i:3"><svg class="bubsvg" viewBox="0 0 140 53" preserveAspectRatio="none" aria-hidden="true"><use href="#bubPath" fill="url(#bubFillOut)" stroke="url(#bubStrokeOut)" stroke-width="1"/></svg><span>at the printer tonight. you&#39;ll have them by service</span><i class="cgl" aria-hidden="true"></i></div>
-        <div class="cbub cbub--in" style="--i:4"><svg class="bubsvg" viewBox="0 0 140 53" preserveAspectRatio="none" aria-hidden="true"><use href="#bubPath" transform="translate(140,0) scale(-1,1)" fill="url(#bubFillIn)" stroke="url(#bubStrokeIn)" stroke-width="1"/></svg><span>unfair to every other barista in this valley</span><i class="cgl" aria-hidden="true"></i></div>
-        <div class="cbub cbub--out" style="--i:5"><svg class="bubsvg" viewBox="0 0 140 53" preserveAspectRatio="none" aria-hidden="true"><use href="#bubPath" fill="url(#bubFillOut)" stroke="url(#bubStrokeOut)" stroke-width="1"/></svg><span>thank you. grinder sound for the reel, hang on</span><i class="cgl" aria-hidden="true"></i></div>
-        <div class="cbub cbub--out" style="--i:6"><svg class="bubsvg" viewBox="0 0 140 53" preserveAspectRatio="none" aria-hidden="true"><use href="#bubPath" fill="url(#bubFillOut)" stroke="url(#bubStrokeOut)" stroke-width="1"/></svg><span><span class="cwave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="cnote">voice note · 0:04 · the grinder</span></span><i class="cgl" aria-hidden="true"></i></div>
-        <div class="cbub cbub--in cbub--typing" style="--i:7"><svg class="bubsvg" viewBox="0 0 140 53" preserveAspectRatio="none" aria-hidden="true"><use href="#bubPath" transform="translate(140,0) scale(-1,1)" fill="url(#bubFillIn)" stroke="url(#bubStrokeIn)" stroke-width="1"/></svg><span><span class="typing" aria-label="client is typing"><i></i><i></i><i></i></span></span><i class="cgl" aria-hidden="true"></i></div>
+        <div class="cbub cbub--in" data-delay="0"><span>winter menu prints friday. are the new drinks real?</span><i class="cgl" aria-hidden="true"></i></div>
+        <div class="cbub cbub--out" data-delay="900"><span>dialled in — v60 ethiopia 1:16, cocoa-plum flat white, 25-second espresso</span><i class="cgl" aria-hidden="true"></i></div>
+        <div class="cbub cbub--in" data-delay="1300"><span>and the cards? with the pour on the back?</span><i class="cgl" aria-hidden="true"></i></div>
+        <div class="cbub cbub--out" data-delay="950"><span>at the printer tonight. you&#39;ll have them by service</span><i class="cgl" aria-hidden="true"></i></div>
+        <div class="cbub cbub--in" data-delay="1200"><span>unfair to every other barista in this valley</span><i class="cgl" aria-hidden="true"></i></div>
+        <div class="cbub cbub--out" data-delay="900"><span>thank you. grinder sound for the reel, hang on</span><i class="cgl" aria-hidden="true"></i></div>
+        <div class="cbub cbub--out" data-delay="1100"><span><span class="cwave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="cnote">voice note · 0:04 · the grinder</span></span><i class="cgl" aria-hidden="true"></i></div>
+        <div class="cbub cbub--in" data-delay="1400"><span><span class="typing" aria-label="client is typing"><i></i><i></i><i></i></span></span><i class="cgl" aria-hidden="true"></i></div>
       </div></div>
     </div>
   </section>
@@ -1172,6 +1161,6 @@
   </div>
 </div>
 
-<script src="js/cosmos.js?v=2026-10-03b" defer></script>
+<script src="js/cosmos.js?v=2026-10-03c" defer></script>
 </body>
 </html>
