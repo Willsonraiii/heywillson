@@ -1,0 +1,227 @@
+/* ═══════════════════════════════════════════════════════════
+   BREW TRIO & STUDIO — macOS window apps & iOS video player
+   the-barista.pdf  · macOS Preview: Barista Craft Handbook & Extraction Physics
+   the-espresso.mov · iOS style video player (clean, zero text clutter inside frame)
+   the-bean.jpg     · macOS Photos: Specialty Micro-Lot Cupping Field Notes
+   craft-for-hire   · Unified Creative macOS Studio Window (Zero Media)
+   ═══════════════════════════════════════════════════════════ */
+
+.plyr__t{ display:none !important }
+
+.trio .card{ gap:14px }
+.trio button{ font:inherit; cursor:pointer }
+
+/* ─────────── shared toolbar elements (using clean site fonts, NO POS mono fonts) ─────────── */
+.tb__mode{ font-family:var(--font); font-size:11px; color:var(--ink-2); text-transform:lowercase }
+#winBarista .win__toolbar button{ font-size:15px; line-height:1; padding:0 }
+#winBarista .win__toolbar button:disabled{ opacity:.35; cursor:default }
+.tb__page b{ font-weight:600; color:var(--ink) }
+
+/* ═════════ 1 · the-barista.pdf (macOS Preview) ═════════ */
+.paper.tx-doc{ display:block; position:relative; min-height:248px; padding:18px 18px 30px; overflow:hidden; outline:none; text-align:left }
+.paper.tx-doc:focus-visible{ box-shadow:0 0 0 2px rgba(255,255,255,.3), 0 26px 52px -18px rgba(0,0,0,.62) }
+.tx-page{ position:absolute; inset:18px 18px 30px; opacity:0; transform:translateX(18px); pointer-events:none;
+  transition:opacity .32s var(--ease), transform .38s var(--ease) }
+.tx-page.is-on{ position:relative; inset:auto; opacity:1; transform:none; pointer-events:auto }
+.tx-page.is-left{ transform:translateX(-18px) }
+.tx-kicker{ display:block; margin-bottom:12px; font-family:var(--font); font-size:10.5px; font-weight:600; letter-spacing:.04em;
+  text-transform:uppercase; color:rgba(38,36,31,.58) }
+.tx-foot{ position:absolute; left:0; right:0; bottom:10px; text-align:center; font-family:var(--font) }
+
+.tx-principles{ list-style:none; margin:0; padding:0; display:grid; gap:10px }
+.tx-principles li{ display:flex; flex-direction:column; gap:2px; padding:8px 10px; border-radius:7px;
+  background:rgba(38,36,31,.045); box-shadow:inset 0 0 0 1px rgba(38,36,31,.07) }
+.tx-principles b{ font-size:12.5px; font-weight:600; color:#1d1b17; letter-spacing:-.015em; font-family:var(--font) }
+.tx-principles p{ margin:0; font-size:11.8px; line-height:1.45; color:rgba(38,36,31,.72); font-family:var(--font) }
+
+.tx-dots{ display:flex; justify-content:center; gap:7px }
+.tx-dots button{ width:7px; height:7px; padding:0; border:0; border-radius:99px; background:var(--g-3);
+  transition:width .25s var(--ease), background .25s var(--ease) }
+.tx-dots button.is-on{ width:20px; background:var(--ac) }
+
+/* ═════════ 2 · the-espresso.mov (iOS Video Player UI) ═════════ */
+#winEspresso .vframe{ position:relative; aspect-ratio:16/10; border-radius:10px; overflow:hidden;
+  background:#050508; box-shadow:inset 0 0 0 1px rgba(255,255,255,.12), 0 16px 36px -12px rgba(0,0,0,.7) }
+#winEspresso .qt-video{ width:100%; height:100%; object-fit:cover; display:block }
+
+/* Default mode: floating play button centered, video loops silently, NO timeline bar */
+#winEspresso .playround{ opacity:1; pointer-events:auto; transition:opacity .25s var(--ease) }
+#winEspresso .plyr{ position:absolute; inset:0; z-index:7; opacity:0; pointer-events:none;
+  transition:opacity .25s var(--ease); display:flex; flex-direction:column; justify-content:space-between;
+  padding:12px; border-radius:inherit; -webkit-user-select:none; user-select:none;
+  background:linear-gradient(180deg, rgba(0,0,0,.35) 0%, rgba(0,0,0,0) 25%, rgba(0,0,0,0) 70%, rgba(0,0,0,.65) 100%) }
+
+/* Player mode (when activated via play button) */
+#winEspresso .vframe[data-player="on"] .playround{ opacity:0; pointer-events:none }
+#winEspresso .vframe[data-player="on"].is-awake .plyr{ opacity:1; pointer-events:auto }
+
+#winEspresso .plyr__row{ display:flex; align-items:center }
+#winEspresso .plyr__row--top{ justify-content:space-between }
+#winEspresso .plyr__x{ width:32px; height:32px }
+#winEspresso .plyr__x svg{ width:48%; height:48% }
+#winEspresso .plyr__row--mid{ justify-content:center; gap:clamp(16px, 4vw, 28px); flex:1 1 auto; align-items:center }
+#winEspresso .plyr__row--low{ justify-content:stretch }
+
+#winEspresso .plyr__btn{ display:grid; place-items:center; border-radius:50%; cursor:pointer; flex:0 0 auto;
+  color:#fff; background:rgba(255,255,255,.24); border:1px solid rgba(255,255,255,.32);
+  -webkit-backdrop-filter:blur(22px) saturate(180%); backdrop-filter:blur(22px) saturate(180%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.4), 0 8px 24px rgba(0,0,0,.35);
+  transition:background .16s var(--ease), transform .14s var(--ease) }
+#winEspresso .plyr__btn:hover{ background:rgba(255,255,255,.36) }
+#winEspresso .plyr__btn:active{ transform:scale(.92) }
+
+#winEspresso .plyr__pp{ width:54px; height:54px; background:rgba(255,255,255,.32) }
+#winEspresso .plyr__pp svg{ width:42%; height:42% }
+#winEspresso .plyr__skip{ position:relative; width:44px; height:44px }
+#winEspresso .plyr__skip svg{ width:62%; height:62% }
+
+/* Frosted Volume Pill */
+#winEspresso .plyr__vol{ display:flex; align-items:center; gap:8px; padding:5px 11px; border-radius:999px;
+  background:rgba(255,255,255,.22); border:1px solid rgba(255,255,255,.3);
+  -webkit-backdrop-filter:blur(20px) saturate(180%); backdrop-filter:blur(20px) saturate(180%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35), 0 6px 20px rgba(0,0,0,.28) }
+#winEspresso .plyr__volrange{ position:relative; width:64px; height:4.5px; border-radius:999px;
+  cursor:pointer; background:rgba(255,255,255,.4); touch-action:none }
+#winEspresso .plyr__vfill{ position:absolute; inset:0 auto 0 0; width:100%; border-radius:999px; background:#fff }
+#winEspresso .plyr__spk{ display:grid; place-items:center; width:18px; height:18px; color:#fff;
+  background:none; border:0; cursor:pointer; padding:0; flex:0 0 auto }
+#winEspresso .plyr__spk svg{ width:100%; height:100% }
+
+/* iOS Video Scrub Timeline Bar (Pure timeline bar, NO numbers) */
+#winEspresso .plyr__bar{ display:flex; align-items:center; width:100%; padding:7px 12px; border-radius:999px;
+  background:rgba(255,255,255,.22); border:1px solid rgba(255,255,255,.3);
+  -webkit-backdrop-filter:blur(20px) saturate(180%); backdrop-filter:blur(20px) saturate(180%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35), 0 6px 20px rgba(0,0,0,.28) }
+#winEspresso .plyr__scrub{ width:100%; display:flex; align-items:center }
+#winEspresso .plyr__track{ position:relative; width:100%; height:5px; border-radius:999px;
+  cursor:pointer; background:rgba(255,255,255,.38); touch-action:none }
+#winEspresso .plyr__fill{ position:absolute; inset:0 auto 0 0; width:0%; border-radius:999px; background:#fff }
+
+/* Barista Daily Calibration Card (Below Video — clean Inter font) */
+.dialin-card{ display:flex; flex-direction:column; gap:7px; padding:11px 13px; border-radius:10px;
+  background:var(--g-1); border:1px solid var(--stroke-2) }
+.dialin-spec{ display:flex; justify-content:space-between; align-items:center; font-family:var(--font); font-size:11.5px }
+.dialin-spec span{ color:var(--ink-2) }
+.dialin-spec b{ color:var(--ink); font-weight:600 }
+.dialin-spec em{ font-style:normal; padding:2px 7px; border-radius:99px; background:var(--ac-a14);
+  color:var(--ac-hi); border:1px solid var(--ac-a34); font-size:11px; font-weight:500 }
+.dialin-sensory{ margin:0; font-size:12px !important; line-height:1.5 !important; color:var(--ink-2); font-family:var(--font) }
+.dialin-sensory b{ color:var(--ink); font-weight:600 }
+.xs-reel{ color:var(--ac-hi); text-decoration:none; white-space:nowrap }
+.xs-reel:hover{ text-decoration:underline }
+
+/* ═════════ 3 · the-bean.jpg (macOS Photos) ═════════ */
+.bx-origins{ display:inline-flex; gap:2px }
+.bx-origins button{ padding:2px 8px; border:0; border-radius:5px; background:transparent; color:var(--ink-3);
+  font-size:11.5px; font-weight:500; font-family:var(--font); transition:all .18s }
+.bx-origins button:hover{ color:var(--ink) }
+.bx-origins button.is-on{ background:var(--g-3); color:var(--ink); box-shadow:0 1px 2px rgba(0,0,0,.3);
+  border:1px solid rgba(255,255,255,.09) }
+
+.ph-hero{ display:flex; flex-direction:column; gap:10px }
+.ph-stage{ position:relative; aspect-ratio:16/9.5; border-radius:10px; overflow:hidden;
+  background:#08080c; box-shadow:inset 0 0 0 1px rgba(255,255,255,.12), 0 16px 36px -12px rgba(0,0,0,.7) }
+.ph-img{ width:100%; height:100%; object-fit:cover; display:block;
+  transition:transform .45s cubic-bezier(.22,.61,.36,1) }
+.ph-stage:hover .ph-img{ transform:scale(1.04) }
+
+.ph-chips-row{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-top:6px }
+.ph-grade-badge{ display:inline-flex; align-items:center; gap:5px;
+  padding:3px 9px; border-radius:99px; background:var(--g-2);
+  border:1px solid rgba(255,255,255,.14); font-family:var(--font); font-size:10.5px; font-weight:500; color:var(--ink); letter-spacing:.02em }
+.ph-dot{ width:5px; height:5px; border-radius:50%; background:var(--ac-hi) }
+
+.ph-roast-chip{ display:inline-flex; align-items:center; padding:2.5px 8px; border-radius:6px;
+  background:var(--g-2); border:1px solid rgba(255,255,255,.12); font-family:var(--font); font-size:10.5px; color:var(--ink-2) }
+
+.ph-details{ display:flex; justify-content:space-between; align-items:flex-start }
+.ph-head{ display:flex; flex-direction:column; gap:2px; width:100% }
+.ph-title{ margin:0; font-size:16.5px; font-weight:600; letter-spacing:-.025em; color:var(--ink); text-transform:none; font-family:var(--font) }
+.ph-sub{ font-family:var(--font); font-size:11.5px; color:var(--ink-3) }
+.ph-variety{ padding:2.5px 8px; border-radius:99px; font-family:var(--font); font-size:10.5px;
+  color:var(--ink-2); background:var(--g-1); border:1px solid var(--stroke-2); white-space:nowrap }
+
+/* Cupping & Sensory Card */
+.ph-cupping{ display:flex; flex-direction:column; gap:9px; padding:11px 12px; border-radius:10px;
+  background:var(--g-1); border:1px solid var(--stroke-2) }
+.ph-cupping-head{ display:flex; justify-content:space-between; align-items:center; font-family:var(--font); font-size:11.5px }
+.ph-cupping-head span:first-child{ color:var(--ink-3); text-transform:uppercase; letter-spacing:.03em; font-weight:500 }
+.ph-roast-name{ color:var(--ac-hi); font-weight:500 }
+
+.ph-bars{ display:grid; gap:6px }
+.ph-bar-row{ display:grid; grid-template-columns:72px 1fr 28px; align-items:center; gap:8px }
+.ph-bar-row span{ font-family:var(--font); font-size:11px; color:var(--ink-3); text-transform:lowercase }
+.ph-bar-row i{ height:6px; border-radius:99px; background:var(--g-3); overflow:hidden; position:relative }
+.ph-bar-row b{ display:block; height:100%; border-radius:inherit;
+  background:linear-gradient(90deg, var(--ac-lo), var(--ac-hi)); transition:width .4s var(--ease) }
+.ph-bar-row em{ font-family:var(--font); font-style:normal; font-size:11px; color:var(--ink-2);
+  text-align:right; font-variant-numeric:tabular-nums; font-weight:500 }
+
+.photo__meta.bx-notes{ display:flex; flex-wrap:wrap; gap:5px; padding-top:4px }
+.photo__meta.bx-notes span{ padding:2px 8px; border-radius:99px; font-size:11px; font-family:var(--font);
+  color:var(--ink-2); background:rgba(0,0,0,.28); border:1px solid var(--stroke-2); transition:opacity .2s }
+
+/* ════════ SERVICES WINDOW (Standard macOS window design matching heyclicky) ════════ */
+.win--services{ max-width:840px; margin:0 auto }
+.services{ padding:20px clamp(16px,2.8vw,26px) 22px; display:flex; flex-direction:column; gap:16px }
+.services__list{ display:flex; flex-direction:column }
+.srow{ padding:14px 4px; border-bottom:1px solid var(--stroke-2); display:flex; flex-direction:column; gap:5px; transition:background .16s }
+.srow:first-child{ padding-top:2px }
+.srow:last-child{ border-bottom:0 }
+.srow:hover{ background:rgba(255,255,255,.03); border-radius:8px }
+.srow__head{ display:flex; justify-content:space-between; align-items:baseline; gap:12px; flex-wrap:wrap }
+.srow__title{ font-size:14.5px; font-weight:600; color:var(--ink); text-transform:lowercase; font-family:var(--font); letter-spacing:-.01em }
+.srow__meta{ font-size:11.5px; color:var(--ink-3); text-transform:lowercase; font-family:var(--font); white-space:nowrap }
+.srow__desc{ margin:0; font-size:12.8px; line-height:1.55; color:var(--ink-2); font-family:var(--font) }
+.services__foot{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;
+  padding-top:14px; border-top:1px solid var(--stroke-2) }
+.services__note{ font-size:11.5px; color:var(--ink-3); font-family:var(--font) }
+.services__actions{ display:flex; gap:10px; align-items:center; flex-wrap:wrap }
+.services__actions .btn{
+  position:relative; display:inline-flex; align-items:center; justify-content:center; gap:7px;
+  height:38px; padding:0 18px; border-radius:999px; overflow:hidden;
+  font-size:13px; font-weight:500; letter-spacing:-.02em; line-height:1;
+  white-space:nowrap !important; text-decoration:none; cursor:pointer;
+  transition:transform .14s var(--ease), box-shadow .18s var(--ease);
+}
+.services__actions .btn:active{ transform:scale(.97) }
+.services__actions .btn .gloss{
+  position:absolute; z-index:1; pointer-events:none; border-radius:999px;
+  top:2px; left:12px; right:12px; height:10px;
+  background:linear-gradient(180deg, rgba(255,255,255,.7), rgba(255,255,255,0));
+}
+.services__actions .btn svg,
+.services__actions .btn span:not(.gloss){ position:relative; z-index:2 }
+
+.services__actions .btn--solid{
+  background:linear-gradient(180deg, #ffffff 0%, #ececed 48%, #e0e0e4 100%);
+  color:#0c0b10; border:1px solid rgba(0,0,0,.16);
+  box-shadow:0 4px 14px rgba(0,0,0,.25), inset 0 1px 0 #fff;
+  text-shadow:0 1px 1px rgba(255,255,255,.7);
+}
+.services__actions .btn--solid:hover{ background:#fff; transform:translateY(-1px); box-shadow:0 6px 18px rgba(0,0,0,.3) }
+
+.services__actions .btn--green,
+.btn--green{
+  background:linear-gradient(180deg, #34d058 0%, #28a745 52%, #1e8738 100%);
+  color:#fff !important; border:1px solid #167a2e;
+  box-shadow:0 4px 14px rgba(32,135,56,.38), inset 0 1px 0 rgba(255,255,255,.45);
+  text-shadow:0 1px 2px rgba(0,0,0,.28);
+}
+.services__actions .btn--green:hover,
+.btn--green:hover{
+  background:linear-gradient(180deg, #38d660 0%, #2ec754 52%, #20923d 100%);
+  transform:translateY(-1px); box-shadow:0 6px 18px rgba(32,135,56,.45);
+}
+
+@media (max-width:560px){
+  .services__actions{ width:100%; gap:8px }
+  .services__actions .btn{ height:36px; padding:0 14px; font-size:12px; flex:1 1 auto; min-width:0 }
+}
+
+/* Window title and right app title size */
+.win__tool{ font-size:13.5px !important; font-weight:500 }
+.win__title{ font-size:13.5px !important; font-weight:500 }
+
+
+

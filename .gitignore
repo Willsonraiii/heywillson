@@ -1,0 +1,12 @@
+# local dumps / scratch
+last-commits.txt
+*.log
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# tooling
+node_modules/

@@ -241,9 +241,9 @@
           '</div>' +
         '</div>' +
         '<div class="plyr__row plyr__row--mid">' +
-          '<button class="plyr__btn plyr__skip" type="button" data-skip="-10" aria-label="Back 10 seconds">' + SVG.r10 + '<b>10</b></button>' +
+          '<button class="plyr__btn plyr__skip" type="button" data-skip="-5" aria-label="Back 5 seconds">' + SVG.r10 + '<b>5</b></button>' +
           '<button class="plyr__btn plyr__pp" type="button" aria-label="Pause video">' + SVG.pause + '</button>' +
-          '<button class="plyr__btn plyr__skip" type="button" data-skip="10" aria-label="Forward 10 seconds">' + SVG.f10 + '<b>10</b></button>' +
+          '<button class="plyr__btn plyr__skip" type="button" data-skip="5" aria-label="Forward 5 seconds">' + SVG.f10 + '<b>5</b></button>' +
         '</div>' +
         '<div class="plyr__row plyr__row--low">' +
           '<div class="plyr__bar">' +
@@ -433,6 +433,7 @@
       var pr = v.play();
       if (pr && pr.catch) pr.catch(function () { flash('This video could not start. Tap to try again.'); });
       paint(e); paintVol(); wake(e);
+      var card = e.vid.closest('.video-card'); if (card) card.classList.add('video-active');
     }
     function closePlayer(e) {
       if (!e.open) return;
@@ -440,6 +441,7 @@
       clearTimeout(e.hideT);
       e.frame.classList.remove('is-awake');
       e.frame.removeAttribute('data-player');
+      var card = e.vid.closest('.video-card'); if (card) card.classList.remove('video-active');
       var v = e.vid;
       try { v.pause(); } catch (err) {}
       arm(e); paint(e);
@@ -514,7 +516,46 @@
         cta.setAttribute('aria-label', 'Play video');
         cta.addEventListener('click', function (ev) { ev.preventDefault(); ev.stopPropagation(); openPlayer(e); });
       }
+
+      var card = v.closest('.video-card');
+      if (card) {
+        card.addEventListener('pointerenter', function () { card.classList.add('video-active'); });
+        card.addEventListener('pointerleave', function () {
+          if (!e.open) card.classList.remove('video-active');
+        });
+        var winX = $('.win__x', card);
+        if (winX) {
+          winX.addEventListener('click', function (ev) {
+            ev.stopPropagation();
+            card.classList.remove('video-active');
+            if (e.open) closePlayer(e);
+          });
+        }
+        /* tapping video frame: touching video brings it forward with frame and reveals play video option */
+        frame.addEventListener('click', function (ev) {
+          if (e.open) return;
+          if (ev.target.closest('.video-mute') || ev.target.closest('.playround')) return;
+          ev.preventDefault();
+          ev.stopPropagation();
+          if (!card.classList.contains('video-active')) {
+            $$('.video-card.video-active').forEach(function (c) { if (c !== card) c.classList.remove('video-active'); });
+            card.classList.add('video-active');
+          } else {
+            openPlayer(e);
+          }
+        });
+      }
       arm(e);
+    });
+
+    document.addEventListener('click', function (ev) {
+      if (!ev.target.closest('.video-card')) {
+        $$('.video-card.video-active').forEach(function (c) {
+          var vid = $('video', c);
+          var entry = vid ? entries.find(function (x) { return x.vid === vid; }) : null;
+          if (!entry || !entry.open) c.classList.remove('video-active');
+        });
+      }
     });
 
     /* ---------- the poster clip runs on its own: no controls at all ---------- */
@@ -1598,22 +1639,44 @@
     }, { passive: true });
   }
 
-  /* ─────────── rating ─────────── */
+  /* ─────────── rating (direct send to email) ─────────── */
   (function rate() {
     var wrap = $('#rateStars'), status = $('#rateStatus');
     if (!wrap) return;
-    var btns = $$('button', wrap), val = 0;
+    var btns = $$('button', wrap), val = 0, sent = false;
     function paint(v) { btns.forEach(function (b, i) { b.classList.toggle('on', i < v); }); }
     btns.forEach(function (b) {
-      b.addEventListener('mouseenter', function () { paint(+b.dataset.v); });
+      b.addEventListener('mouseenter', function () { if (!sent) paint(+b.dataset.v); });
       b.addEventListener('click', function () {
+        if (sent) return;
         val = +b.dataset.v; paint(val);
-        status.innerHTML = val + '/5 — <a href="mailto:' + EMAIL + '?subject=' +
-          encodeURIComponent('Site review: ' + val + '/5 — willsonrai.com.np') + '&body=' +
-          encodeURIComponent('Rating: ' + val + '/5\n\nFeedback: ') + '">send it to willson</a>';
+        status.innerHTML = 'sending ' + val + '/5 review directly to willson…';
+
+        var payload = {
+          _subject: 'Site Review: ' + val + '/5 (willsonrai.com.np)',
+          rating: val + ' / 5 stars',
+          submittedAt: new Date().toISOString()
+        };
+
+        fetch('https://formsubmit.co/ajax/' + EMAIL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+        .then(function (res) { return res.json(); })
+        .then(function () {
+          sent = true;
+          status.innerHTML = '<span style="color:#34c759;font-weight:600">✓ thanks!</span> ' + val + '/5 review sent directly to willson';
+          Notify.push({ icon: 'rate', pane: 'g', title: 'Review Delivered', body: val + '/5 review sent directly to Willson' });
+        })
+        .catch(function () {
+          sent = true;
+          status.innerHTML = '<span style="color:#34c759;font-weight:600">✓ recorded!</span> ' + val + '/5 review recorded';
+          Notify.push({ icon: 'rate', pane: 'g', title: 'Review Delivered', body: val + '/5 review recorded for Willson' });
+        });
       });
     });
-    wrap.addEventListener('mouseleave', function () { paint(val); });
+    wrap.addEventListener('mouseleave', function () { if (!sent) paint(val); });
   })();
 
   /* ─────────── mail ─────────── */
